@@ -32,6 +32,12 @@ function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height)
     window.CarSimEnvironment.drawEnvironment(ctx, canvas, state)
 
+    ctx.save()
+    ctx.translate(canvas.width / 2, canvas.height / 2)
+    ctx.rotate(state.car.facingAngle * Math.PI / 180)
+    window.CarSimUI.drawCar(ctx, state)
+    ctx.restore()
+
     carCenter = window.CarSimPhysics.getCarCenter(state.car)
     trailerOffsetX = state.trailer.xPosition - carCenter.x
     trailerOffsetY = state.trailer.yPosition - carCenter.y
@@ -40,12 +46,6 @@ function draw() {
     ctx.translate(canvas.width / 2 + trailerOffsetX, canvas.height / 2 + trailerOffsetY)
     ctx.rotate(state.trailer.facingAngle * Math.PI / 180)
     window.CarSimUI.drawTrailer(ctx, state)
-    ctx.restore()
-
-    ctx.save()
-    ctx.translate(canvas.width / 2, canvas.height / 2)
-    ctx.rotate(state.car.facingAngle * Math.PI / 180)
-    window.CarSimUI.drawCar(ctx, state)
     ctx.restore()
 
     window.CarSimUI.drawHud(ctx, canvas, state.car)
