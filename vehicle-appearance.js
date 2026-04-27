@@ -5,6 +5,7 @@ window.CarSimVehicleAppearance = (function() {
 
     function drawCar(ctx, car, wheels, options) {
         var wheelsOnly = options && options.wheelsOnly
+        var showShadows = !options || options.showShadows !== false
 
         if (debugMode) {
             ctx.strokeStyle = "rgb(255, 0, 0)"
@@ -33,7 +34,9 @@ window.CarSimVehicleAppearance = (function() {
         var hoodStart = cabStart + cabLength * 0.58
         var stackX = sleeperStart - car.width * 0.01
 
-        drawTruckShadow(ctx, car)
+        if (showShadows) {
+            drawTruckShadow(ctx, car)
+        }
 
         drawRearDualWheelSet(ctx, rearAxleBack, -outerWheelY, wheelWidth, wheelHeight, dualWheelGap, wheels.rearLeft)
         drawRearDualWheelSet(ctx, rearAxleBack, outerWheelY, wheelWidth, wheelHeight, dualWheelGap, wheels.rearRight)

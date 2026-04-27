@@ -51,6 +51,7 @@ window.CarSimPhysics = (function() {
             debugWheelTrails: false,
             debugShowHitboxes: false,
             debugDetachTrailer: false,
+            graphicsShowShadows: true,
             wheelTrails: {
                 frontLeft: [],
                 frontRight: [],
