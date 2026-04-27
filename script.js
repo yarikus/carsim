@@ -5,9 +5,7 @@ var canvas = document.getElementById("tela")
 canvas.addEventListener("click", onClick)
 var ctx = canvas.getContext("2d")
 
-const WORLD_SCALE = 2.4
-const TRACK_PADDING = 24
-const START_SEGMENT_INDEX = 0
+const SURFACE_FRICTION = 0.99
 
 const car = {
     width: 58,
@@ -18,15 +16,11 @@ const car = {
     displayVelocity: 0,
     forceFoward: 0,
     forceBackward: 0,
-    facingAngle: 0,
-    isOnRoad: true
+    facingAngle: 0
 }
 
 const baseForce = 0.06
 const baseTurningSpeed = 3.4
-const baseRoadAttrition = 0.99
-const baseDirtAttrition = 0.94
-
 const maxSpeedFront = 7.5
 const maxSpeedBack = -3
 
@@ -34,22 +28,9 @@ const debugMode = false
 var musicOn = true
 
 var keyArray = []
-var roadArray = []
-var turnArray = []
-
-const baseRoadSegments = [
-    {x: 240, y: 85, w: 560, h: 60},
-    {x: 800, y: 145, w: 60, h: 150},
-    {x: 860, y: 295, w: 150, h: 60},
-    {x: 1010, y: 355, w: 60, h: 200},
-    {x: 400, y: 555, w: 610, h: 60},
-    {x: 340, y: 455, w: 60, h: 100},
-    {x: 240, y: 395, w: 100, h: 60},
-    {x: 180, y: 145, w: 60, h: 250}
-]
 
 resizeCanvas()
-initializeTrack()
+initializeWorld()
 
 window.addEventListener("resize", resizeCanvas)
 requestAnimationFrame(draw)
@@ -57,7 +38,6 @@ requestAnimationFrame(draw)
 function draw() {
     musicControl()
     processKeys()
-    checkCollision()
     moveCar()
 
     ctx.clearRect(0, 0, canvas.width, canvas.height)
@@ -73,64 +53,9 @@ function draw() {
     requestAnimationFrame(draw)
 }
 
-function initializeTrack() {
-    roadArray = baseRoadSegments.map(function(segment) {
-        return {
-            x: segment.x * WORLD_SCALE,
-            y: segment.y * WORLD_SCALE,
-            w: segment.w * WORLD_SCALE,
-            h: segment.h * WORLD_SCALE
-        }
-    })
-
-    turnArray = [
-        {x: roadArray[1].x, y: roadArray[0].y},
-        {x: roadArray[1].x, y: roadArray[2].y},
-        {x: roadArray[3].x, y: roadArray[2].y},
-        {x: roadArray[3].x, y: roadArray[4].y},
-        {x: roadArray[5].x, y: roadArray[4].y},
-        {x: roadArray[5].x, y: roadArray[6].y},
-        {x: roadArray[7].x, y: roadArray[6].y},
-        {x: roadArray[7].x, y: roadArray[0].y}
-    ].map(function(turn) {
-        return {
-            x: turn.x,
-            y: turn.y,
-            size: 60 * WORLD_SCALE
-        }
-    })
-
-    car.xPosition = roadArray[START_SEGMENT_INDEX].x + roadArray[START_SEGMENT_INDEX].w * 0.45
-    car.yPosition = roadArray[START_SEGMENT_INDEX].y + roadArray[START_SEGMENT_INDEX].h / 2 - car.height / 2
-}
-
-function checkCollision() {
-    var i
-
-    for (i = 0; i < turnArray.length; i++) {
-        if (RectsColliding(turnArray[i].x, turnArray[i].y, turnArray[i].size, turnArray[i].size)) {
-            car.isOnRoad = true
-            return
-        }
-    }
-
-    for (i = 0; i < roadArray.length; i++) {
-        if (RectsColliding(
-            roadArray[i].x - TRACK_PADDING,
-            roadArray[i].y - TRACK_PADDING,
-            roadArray[i].w + TRACK_PADDING * 2,
-            roadArray[i].h + TRACK_PADDING * 2
-        )) {
-            car.isOnRoad = true
-            return
-        }
-    }
-
-    car.isOnRoad = false
-}
-
-function RectsColliding(x, y, w, h) {
-    return !(car.xPosition > x + w || car.xPosition + car.width + 8 < x || car.yPosition > y + h || car.yPosition + car.height + 12 < y)
+function initializeWorld() {
+    car.xPosition = -car.width / 2
+    car.yPosition = -car.height / 2
 }
 
 function drawEnvironment() {
@@ -139,12 +64,11 @@ function drawEnvironment() {
 
     ctx.save()
     ctx.translate(canvas.width / 2 - cameraX, canvas.height / 2 - cameraY)
-    drawGrass(cameraX, cameraY)
-    drawRoads()
+    drawSurface(cameraX, cameraY)
     ctx.restore()
 }
 
-function drawGrass(cameraX, cameraY) {
+function drawSurface(cameraX, cameraY) {
     var tileSize = 160
     var startX = Math.floor((cameraX - canvas.width) / tileSize) * tileSize
     var endX = Math.ceil((cameraX + canvas.width) / tileSize) * tileSize
@@ -156,78 +80,28 @@ function drawGrass(cameraX, cameraY) {
     for (x = startX; x <= endX; x += tileSize) {
         for (y = startY; y <= endY; y += tileSize) {
             ctx.fillStyle = (Math.floor(x / tileSize) + Math.floor(y / tileSize)) % 2 === 0
-                ? "rgb(75, 122, 56)"
-                : "rgb(68, 114, 50)"
+                ? "rgb(78, 120, 62)"
+                : "rgb(71, 111, 56)"
             ctx.fillRect(x, y, tileSize, tileSize)
         }
     }
-}
 
-function drawRoads() {
-    var i
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.05)"
+    ctx.lineWidth = 2
 
-    for (i = 0; i < roadArray.length; i++) {
-        ctx.fillStyle = "rgb(88, 82, 70)"
-        ctx.fillRect(
-            roadArray[i].x - TRACK_PADDING,
-            roadArray[i].y - TRACK_PADDING,
-            roadArray[i].w + TRACK_PADDING * 2,
-            roadArray[i].h + TRACK_PADDING * 2
-        )
-
-        ctx.fillStyle = "rgb(43, 43, 43)"
-        ctx.fillRect(roadArray[i].x, roadArray[i].y, roadArray[i].w, roadArray[i].h)
+    for (x = startX; x <= endX; x += tileSize) {
+        ctx.beginPath()
+        ctx.moveTo(x, startY)
+        ctx.lineTo(x, endY)
+        ctx.stroke()
     }
 
-    drawTurn(turnArray[0].x, turnArray[0].y, roadArray[2].x, roadArray[1].y, roadArray[1].x, roadArray[1].y)
-    drawTurn(turnArray[1].x, turnArray[1].y, roadArray[2].x, roadArray[2].y, roadArray[2].x, roadArray[3].y)
-    drawTurn(turnArray[2].x, turnArray[2].y, roadArray[3].x, roadArray[3].y, roadArray[3].x + roadArray[3].w, roadArray[3].y)
-    drawTurn(roadArray[3].x + roadArray[3].w, roadArray[4].y, turnArray[3].x, turnArray[3].y, roadArray[3].x, roadArray[4].y + roadArray[4].h)
-    drawTurn(roadArray[4].x, roadArray[4].y + roadArray[4].h, roadArray[4].x, roadArray[4].y, turnArray[4].x, turnArray[4].y)
-    drawTurn(roadArray[4].x, roadArray[5].y, roadArray[5].x, roadArray[5].y, turnArray[5].x, roadArray[6].y)
-    drawTurn(roadArray[6].x, roadArray[5].y, roadArray[6].x, roadArray[6].y, roadArray[7].x, roadArray[6].y)
-    drawTurn(roadArray[7].x, roadArray[7].y, roadArray[0].x, roadArray[7].y, roadArray[0].x, roadArray[0].y)
-
-    drawLaneMarkings()
-    drawStartLine()
-}
-
-function drawTurn(x1, y1, x2, y2, x3, y3) {
-    ctx.fillStyle = "rgb(43, 43, 43)"
-    ctx.beginPath()
-    ctx.moveTo(x1, y1)
-    ctx.lineTo(x2, y2)
-    ctx.lineTo(x3, y3)
-    ctx.fill()
-}
-
-function drawLaneMarkings() {
-    ctx.strokeStyle = "rgba(255, 255, 255, 0.8)"
-    ctx.lineWidth = 8
-    ctx.setLineDash([36, 28])
-
-    ctx.beginPath()
-    ctx.moveTo(roadArray[0].x + 80, roadArray[0].y + roadArray[0].h / 2)
-    ctx.lineTo(roadArray[0].x + roadArray[0].w - 70, roadArray[0].y + roadArray[0].h / 2)
-    ctx.lineTo(roadArray[1].x + roadArray[1].w / 2, roadArray[1].y + 60)
-    ctx.lineTo(roadArray[2].x + 60, roadArray[2].y + roadArray[2].h / 2)
-    ctx.lineTo(roadArray[3].x + roadArray[3].w / 2, roadArray[3].y + 60)
-    ctx.lineTo(roadArray[4].x + roadArray[4].w - 70, roadArray[4].y + roadArray[4].h / 2)
-    ctx.lineTo(roadArray[5].x + roadArray[5].w / 2, roadArray[5].y + 20)
-    ctx.lineTo(roadArray[6].x + 36, roadArray[6].y + roadArray[6].h / 2)
-    ctx.lineTo(roadArray[7].x + roadArray[7].w / 2, roadArray[7].y + 60)
-    ctx.lineTo(roadArray[0].x + 70, roadArray[0].y + roadArray[0].h / 2)
-    ctx.stroke()
-
-    ctx.setLineDash([])
-}
-
-function drawStartLine() {
-    var lineX = roadArray[0].x + roadArray[0].w * 0.55
-
-    ctx.fillStyle = "rgb(240, 240, 240)"
-    ctx.fillRect(lineX, roadArray[0].y - 28, 18, roadArray[0].h + 56)
-    ctx.fillRect(lineX + 34, roadArray[0].y - 28, 18, roadArray[0].h + 56)
+    for (y = startY; y <= endY; y += tileSize) {
+        ctx.beginPath()
+        ctx.moveTo(startX, y)
+        ctx.lineTo(endX, y)
+        ctx.stroke()
+    }
 }
 
 function drawCar() {
@@ -272,13 +146,8 @@ function drawCar() {
 
 function moveCar() {
     if (car.velocity !== 0) {
-        if (car.isOnRoad) {
-            car.forceFoward *= baseRoadAttrition
-            car.forceBackward *= baseRoadAttrition
-        } else {
-            car.forceFoward *= baseDirtAttrition
-            car.forceBackward *= baseDirtAttrition
-        }
+        car.forceFoward *= SURFACE_FRICTION
+        car.forceBackward *= SURFACE_FRICTION
     }
 
     car.velocity = Number((car.forceFoward - car.forceBackward).toFixed(3))
@@ -334,14 +203,9 @@ function drawHud() {
     ctx.font = "18px Arial"
     ctx.fillText("SPEED", 46, canvas.height - 84)
 
-    ctx.fillStyle = car.isOnRoad ? "rgb(255, 255, 255)" : "rgb(255, 197, 96)"
+    ctx.fillStyle = "rgb(255, 255, 255)"
     ctx.font = "bold 36px Arial"
     ctx.fillText(car.displayVelocity + " km/h", 44, canvas.height - 46)
-
-    if (!car.isOnRoad) {
-        ctx.font = "16px Arial"
-        ctx.fillText("OFF ROAD", 140, canvas.height - 84)
-    }
     ctx.restore()
 }
 
