@@ -107,6 +107,8 @@ window.CarSimVehicleAppearance = (function() {
         ctx.fillStyle = "rgb(92, 96, 100)"
         roundRect(ctx, -car.width * 0.24, -car.height * 0.17, car.width * 0.12, car.height * 0.34, 5)
         ctx.fill()
+
+        drawKingpinPlate(ctx, car)
     }
 
     function drawTruckShadow(ctx, car) {
@@ -148,6 +150,38 @@ window.CarSimVehicleAppearance = (function() {
         ctx.lineTo(0, height * 0.32)
         ctx.stroke()
         ctx.restore()
+    }
+
+    function drawKingpinPlate(ctx, car) {
+        var kingpinX = car.hitchOffset
+        var plateWidth = car.width * 0.12
+        var plateHeight = car.height * 0.46
+        var kingpinRadius = car.height * 0.08
+        var plateX = kingpinX - plateWidth * 0.55
+
+        ctx.fillStyle = "rgb(74, 78, 84)"
+        roundRect(ctx, plateX, -plateHeight / 2, plateWidth, plateHeight, 6)
+        ctx.fill()
+
+        ctx.fillStyle = "rgb(160, 255, 60)"
+        ctx.beginPath()
+        ctx.arc(kingpinX, 0, kingpinRadius, 0, Math.PI * 2)
+        ctx.fill()
+
+        ctx.strokeStyle = "rgb(255, 48, 48)"
+        ctx.lineWidth = 2
+        ctx.beginPath()
+        ctx.arc(kingpinX, 0, kingpinRadius + 1.5, 0, Math.PI * 2)
+        ctx.stroke()
+
+        ctx.strokeStyle = "rgb(255, 48, 48)"
+        ctx.lineWidth = 2
+        ctx.beginPath()
+        ctx.moveTo(kingpinX - kingpinRadius * 0.9, 0)
+        ctx.lineTo(kingpinX + kingpinRadius * 0.9, 0)
+        ctx.moveTo(kingpinX, -kingpinRadius * 0.9)
+        ctx.lineTo(kingpinX, kingpinRadius * 0.9)
+        ctx.stroke()
     }
 
     function roundRect(ctx, x, y, width, height, radius) {
