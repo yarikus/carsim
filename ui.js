@@ -94,11 +94,9 @@ window.CarSimUI = (function() {
     }
 
     function drawTrailer(ctx, state) {
-        if (state.modelDebugWheelsOnly) {
-            return
-        }
-
-        window.CarSimTrailerAppearance.drawTrailer(ctx, state.trailer)
+        window.CarSimTrailerAppearance.drawTrailer(ctx, state.trailer, {
+            wheelsOnly: state.modelDebugWheelsOnly
+        })
     }
 
     function initializeDetachTrailerToggle(state) {
