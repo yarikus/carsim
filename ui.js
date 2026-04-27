@@ -3,6 +3,7 @@
 window.CarSimUI = (function() {
     function initializeControls(state) {
         var configControls = document.querySelectorAll("[data-config]")
+        var debugToggle = document.getElementById("modelDebugToggle")
         var i
 
         for (i = 0; i < configControls.length; i++) {
@@ -13,6 +14,13 @@ window.CarSimUI = (function() {
                 syncControlValue(control)
             })
             syncControlValue(configControls[i])
+        }
+
+        if (debugToggle) {
+            debugToggle.checked = state.modelDebugWheelsOnly
+            debugToggle.addEventListener("change", function(evt) {
+                state.modelDebugWheelsOnly = evt.target.checked
+            })
         }
     }
 
@@ -66,8 +74,10 @@ window.CarSimUI = (function() {
         ctx.restore()
     }
 
-    function drawCar(ctx, car) {
-        window.CarSimVehicleAppearance.drawCar(ctx, car)
+    function drawCar(ctx, state) {
+        window.CarSimVehicleAppearance.drawCar(ctx, state.car, {
+            wheelsOnly: state.modelDebugWheelsOnly
+        })
     }
 
     function syncControlValue(control) {

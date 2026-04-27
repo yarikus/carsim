@@ -25,6 +25,7 @@ window.CarSimPhysics = (function() {
                 maxSpeedBack: -3,
                 maxSteeringAngle: 28
             },
+            modelDebugWheelsOnly: false,
             keyArray: [],
             musicOn: true
         }

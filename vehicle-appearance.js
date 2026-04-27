@@ -3,7 +3,9 @@
 window.CarSimVehicleAppearance = (function() {
     var debugMode = false
 
-    function drawCar(ctx, car) {
+    function drawCar(ctx, car, options) {
+        var wheelsOnly = options && options.wheelsOnly
+
         if (debugMode) {
             ctx.strokeStyle = "rgb(255, 0, 0)"
             ctx.beginPath()
@@ -40,6 +42,10 @@ window.CarSimVehicleAppearance = (function() {
         drawRearDualWheelSet(ctx, rearAxleFront, outerWheelY, wheelWidth, wheelHeight, dualWheelGap)
         drawWheel(ctx, steerAxleX, -outerWheelY, wheelWidth, wheelHeight, frontWheelAngle)
         drawWheel(ctx, steerAxleX, outerWheelY, wheelWidth, wheelHeight, frontWheelAngle)
+
+        if (wheelsOnly) {
+            return
+        }
 
         ctx.fillStyle = "rgb(74, 80, 86)"
         roundRect(ctx, -car.width * 0.34, -car.height * 0.12, frameLength, car.height * 0.24, 6)

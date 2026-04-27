@@ -31,7 +31,7 @@ function draw() {
     ctx.save()
     ctx.translate(canvas.width / 2, canvas.height / 2)
     ctx.rotate(state.car.facingAngle * Math.PI / 180)
-    window.CarSimUI.drawCar(ctx, state.car)
+    window.CarSimUI.drawCar(ctx, state)
     ctx.restore()
 
     window.CarSimUI.drawHud(ctx, canvas, state.car)

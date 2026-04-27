@@ -173,6 +173,25 @@
                 cursor: pointer;
                 border: none;
             }
+
+            .control-checkbox {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                margin-top: 10px;
+                color: rgba(255, 255, 255, 0.88);
+                font-size: 14px;
+                cursor: pointer;
+                user-select: none;
+            }
+
+            .control-checkbox input {
+                width: 18px;
+                height: 18px;
+                margin: 0;
+                accent-color: rgb(236, 236, 236);
+                cursor: pointer;
+            }
         </style>
         <audio muted id="music">
             <source src="gasgasgas.mp3" type="audio/mpeg">
@@ -236,6 +255,13 @@
                     <span class="control-value" data-value-for="steeringAngleControl">28</span>
                 </label>
                 <input class="control-slider" id="steeringAngleControl" data-config="maxSteeringAngle" type="range" min="10" max="45" step="1" value="28">
+            </div>
+
+            <div class="control-group">
+                <label class="control-checkbox" for="modelDebugToggle">
+                    <input id="modelDebugToggle" type="checkbox">
+                    <span>Debug wheels only</span>
+                </label>
             </div>
         </aside>
         <script src="physics.js"></script>
