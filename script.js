@@ -3,11 +3,10 @@
 var music = document.getElementById("music")
 var canvas = document.getElementById("tela")
 var musicToggle = document.getElementById("musicToggle")
+var configControls = document.querySelectorAll("[data-config]")
 canvas.addEventListener("click", onClick)
 musicToggle.addEventListener("click", toggleMusic)
 var ctx = canvas.getContext("2d")
-
-const SURFACE_FRICTION = 0.99
 
 const car = {
     width: 84,
@@ -22,11 +21,15 @@ const car = {
     steeringAngle: 0
 }
 
-const baseForce = 0.06
-const baseTurningSpeed = 3.4
-const maxSpeedFront = 7.5
-const maxSpeedBack = -3
-const maxSteeringAngle = 28
+var physicsConfig = {
+    baseForce: 0.06,
+    baseTurningSpeed: 3.4,
+    surfaceFriction: 0.99,
+    maxSpeedFront: 7.5,
+    maxSpeedBack: -3,
+    maxSteeringAngle: 28
+}
+
 const steeringReturnSpeed = 2.2
 
 const debugMode = false
@@ -36,6 +39,7 @@ var keyArray = []
 
 resizeCanvas()
 initializeWorld()
+initializeControls()
 
 window.addEventListener("resize", resizeCanvas)
 requestAnimationFrame(draw)
@@ -211,8 +215,8 @@ function roundRect(x, y, width, height, radius) {
 
 function moveCar() {
     if (car.velocity !== 0) {
-        car.forceFoward *= SURFACE_FRICTION
-        car.forceBackward *= SURFACE_FRICTION
+        car.forceFoward *= physicsConfig.surfaceFriction
+        car.forceBackward *= physicsConfig.surfaceFriction
     }
 
     car.velocity = Number((car.forceFoward - car.forceBackward).toFixed(3))
@@ -225,23 +229,23 @@ function processKeys() {
     var steeringInput = 0
 
     if (keyArray["ArrowRight"] && car.velocity !== 0) {
-        car.facingAngle += baseTurningSpeed
+        car.facingAngle += physicsConfig.baseTurningSpeed
         steeringInput = 1
     }
 
     if (keyArray["ArrowLeft"] && car.velocity !== 0) {
-        car.facingAngle -= baseTurningSpeed
+        car.facingAngle -= physicsConfig.baseTurningSpeed
         steeringInput = -1
         music.muted = false
     }
 
-    if (keyArray["ArrowUp"] && car.velocity < maxSpeedFront) {
-        car.forceFoward += baseForce
+    if (keyArray["ArrowUp"] && car.velocity < physicsConfig.maxSpeedFront) {
+        car.forceFoward += physicsConfig.baseForce
         music.muted = false
     }
 
-    if (keyArray["ArrowDown"] && car.velocity > maxSpeedBack) {
-        car.forceBackward += baseForce
+    if (keyArray["ArrowDown"] && car.velocity > physicsConfig.maxSpeedBack) {
+        car.forceBackward += physicsConfig.baseForce
         music.muted = false
     }
 
@@ -251,7 +255,7 @@ function processKeys() {
 function updateSteeringAngle(steeringInput) {
     if (steeringInput !== 0) {
         car.steeringAngle += steeringInput * steeringReturnSpeed * 2.3
-        car.steeringAngle = Math.max(-maxSteeringAngle, Math.min(maxSteeringAngle, car.steeringAngle))
+        car.steeringAngle = Math.max(-physicsConfig.maxSteeringAngle, Math.min(physicsConfig.maxSteeringAngle, car.steeringAngle))
         return
     }
 
@@ -273,8 +277,48 @@ function musicControl() {
 }
 
 function resizeCanvas() {
-    canvas.width = window.innerWidth
+    canvas.width = canvas.clientWidth
     canvas.height = window.innerHeight
+}
+
+function initializeControls() {
+    var i
+
+    for (i = 0; i < configControls.length; i++) {
+        configControls[i].addEventListener("input", onConfigInput)
+        syncControlValue(configControls[i])
+    }
+}
+
+function onConfigInput(evt) {
+    var control = evt.target
+    var configKey = control.dataset.config
+    physicsConfig[configKey] = Number(control.value)
+    syncControlValue(control)
+}
+
+function syncControlValue(control) {
+    var valueLabel = document.querySelector('[data-value-for="' + control.id + '"]')
+
+    if (!valueLabel) {
+        return
+    }
+
+    valueLabel.textContent = formatControlValue(control.value)
+}
+
+function formatControlValue(value) {
+    var numericValue = Number(value)
+
+    if (Math.abs(numericValue) >= 10 || Number.isInteger(numericValue)) {
+        return String(numericValue)
+    }
+
+    if (Math.abs(numericValue) >= 1) {
+        return numericValue.toFixed(1)
+    }
+
+    return numericValue.toFixed(3).replace(/0+$/, "").replace(/\.$/, "")
 }
 
 function drawHud() {

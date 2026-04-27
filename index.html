@@ -7,31 +7,30 @@
     </head>
 
     <body>
-        <audio muted id="music">
-            <source src="gasgasgas.mp3" type="audio/mpeg">
-        </audio>
-        <button id="musicToggle" type="button" aria-label="Pause music" title="Pause music">
-            <span class="pause-icon" aria-hidden="true">
-                <span></span>
-                <span></span>
-            </span>
-        </button>
         <style>
             html, body {
                 margin: 0;
                 height: 100%;
-                overflow: hidden;
                 background: #111;
             }
 
             body {
                 font-family: Arial, sans-serif;
+                display: flex;
+                min-height: 100vh;
+                overflow: hidden;
+            }
+
+            .sim-shell {
+                position: relative;
+                flex: 1;
+                min-width: 0;
             }
 
             #musicToggle {
                 position: fixed;
                 top: 20px;
-                right: 20px;
+                right: 332px;
                 width: 58px;
                 height: 58px;
                 display: flex;
@@ -96,12 +95,149 @@
 
             #tela {
                 display: block;
-                width: 100vw;
+                width: 100%;
                 height: 100vh;
                 background: linear-gradient(180deg, rgb(72, 108, 38) 0%, rgb(92, 128, 54) 100%);
             }
+
+            .sidebar {
+                width: 312px;
+                flex: 0 0 312px;
+                box-sizing: border-box;
+                padding: 24px 20px;
+                background: linear-gradient(180deg, rgb(18, 20, 23) 0%, rgb(13, 15, 17) 100%);
+                border-left: 1px solid rgba(255, 255, 255, 0.08);
+                color: rgba(255, 255, 255, 0.92);
+                overflow-y: auto;
+            }
+
+            .sidebar h2 {
+                margin: 0 0 8px;
+                font-size: 22px;
+                font-weight: 700;
+                letter-spacing: 0.02em;
+            }
+
+            .sidebar p {
+                margin: 0 0 22px;
+                color: rgba(255, 255, 255, 0.58);
+                font-size: 14px;
+                line-height: 1.5;
+            }
+
+            .control-group {
+                margin-bottom: 18px;
+            }
+
+            .control-label {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 12px;
+                margin-bottom: 8px;
+                font-size: 13px;
+                color: rgba(255, 255, 255, 0.82);
+            }
+
+            .control-value {
+                min-width: 54px;
+                text-align: right;
+                color: rgba(255, 255, 255, 0.95);
+                font-variant-numeric: tabular-nums;
+            }
+
+            .control-slider {
+                width: 100%;
+                appearance: none;
+                height: 6px;
+                border-radius: 999px;
+                background: rgba(255, 255, 255, 0.14);
+                outline: none;
+            }
+
+            .control-slider::-webkit-slider-thumb {
+                appearance: none;
+                width: 18px;
+                height: 18px;
+                border-radius: 50%;
+                background: rgb(236, 236, 236);
+                cursor: pointer;
+                border: none;
+            }
+
+            .control-slider::-moz-range-thumb {
+                width: 18px;
+                height: 18px;
+                border-radius: 50%;
+                background: rgb(236, 236, 236);
+                cursor: pointer;
+                border: none;
+            }
         </style>
-    <canvas id="tela" width="1280" height="680"></canvas>
-    <script src="script.js"></script>
+        <audio muted id="music">
+            <source src="gasgasgas.mp3" type="audio/mpeg">
+        </audio>
+        <div class="sim-shell">
+            <button id="musicToggle" type="button" aria-label="Pause music" title="Pause music">
+                <span class="pause-icon" aria-hidden="true">
+                    <span></span>
+                    <span></span>
+                </span>
+            </button>
+            <canvas id="tela" width="1280" height="680"></canvas>
+        </div>
+        <aside class="sidebar">
+            <h2>Vehicle Physics</h2>
+            <p>Настройка основных параметров автомобиля в реальном времени.</p>
+
+            <div class="control-group">
+                <label class="control-label" for="baseForceControl">
+                    <span>Acceleration</span>
+                    <span class="control-value" data-value-for="baseForceControl">0.06</span>
+                </label>
+                <input class="control-slider" id="baseForceControl" data-config="baseForce" type="range" min="0.02" max="0.2" step="0.005" value="0.06">
+            </div>
+
+            <div class="control-group">
+                <label class="control-label" for="turnSpeedControl">
+                    <span>Turn Speed</span>
+                    <span class="control-value" data-value-for="turnSpeedControl">3.4</span>
+                </label>
+                <input class="control-slider" id="turnSpeedControl" data-config="baseTurningSpeed" type="range" min="1.2" max="8" step="0.1" value="3.4">
+            </div>
+
+            <div class="control-group">
+                <label class="control-label" for="frictionControl">
+                    <span>Surface Friction</span>
+                    <span class="control-value" data-value-for="frictionControl">0.99</span>
+                </label>
+                <input class="control-slider" id="frictionControl" data-config="surfaceFriction" type="range" min="0.9" max="0.999" step="0.001" value="0.99">
+            </div>
+
+            <div class="control-group">
+                <label class="control-label" for="frontSpeedControl">
+                    <span>Max Forward Speed</span>
+                    <span class="control-value" data-value-for="frontSpeedControl">7.5</span>
+                </label>
+                <input class="control-slider" id="frontSpeedControl" data-config="maxSpeedFront" type="range" min="3" max="16" step="0.5" value="7.5">
+            </div>
+
+            <div class="control-group">
+                <label class="control-label" for="backSpeedControl">
+                    <span>Max Reverse Speed</span>
+                    <span class="control-value" data-value-for="backSpeedControl">-3.0</span>
+                </label>
+                <input class="control-slider" id="backSpeedControl" data-config="maxSpeedBack" type="range" min="-8" max="-1" step="0.5" value="-3">
+            </div>
+
+            <div class="control-group">
+                <label class="control-label" for="steeringAngleControl">
+                    <span>Steering Limit</span>
+                    <span class="control-value" data-value-for="steeringAngleControl">28</span>
+                </label>
+                <input class="control-slider" id="steeringAngleControl" data-config="maxSteeringAngle" type="range" min="10" max="45" step="1" value="28">
+            </div>
+        </aside>
+        <script src="script.js"></script>
     </body>
 </html>
