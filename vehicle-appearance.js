@@ -3,7 +3,7 @@
 window.CarSimVehicleAppearance = (function() {
     var debugMode = false
 
-    function drawCar(ctx, car, options) {
+    function drawCar(ctx, car, wheels, options) {
         var wheelsOnly = options && options.wheelsOnly
 
         if (debugMode) {
@@ -25,7 +25,6 @@ window.CarSimVehicleAppearance = (function() {
         var rearAxleBack = rearAxleFront - car.width * 0.12
         var steerAxleX = car.width * 0.34
         var outerWheelY = car.height * 0.42
-        var frontWheelAngle = car.steeringAngle * Math.PI / 180
         var wheelWidth = car.width * 0.115
         var wheelHeight = car.height * 0.18
         var dualWheelGap = car.height * 0.09
@@ -36,12 +35,12 @@ window.CarSimVehicleAppearance = (function() {
 
         drawTruckShadow(ctx, car)
 
-        drawRearDualWheelSet(ctx, rearAxleBack, -outerWheelY, wheelWidth, wheelHeight, dualWheelGap)
-        drawRearDualWheelSet(ctx, rearAxleBack, outerWheelY, wheelWidth, wheelHeight, dualWheelGap)
-        drawRearDualWheelSet(ctx, rearAxleFront, -outerWheelY, wheelWidth, wheelHeight, dualWheelGap)
-        drawRearDualWheelSet(ctx, rearAxleFront, outerWheelY, wheelWidth, wheelHeight, dualWheelGap)
-        drawWheel(ctx, steerAxleX, -outerWheelY, wheelWidth, wheelHeight, frontWheelAngle)
-        drawWheel(ctx, steerAxleX, outerWheelY, wheelWidth, wheelHeight, frontWheelAngle)
+        drawRearDualWheelSet(ctx, rearAxleBack, -outerWheelY, wheelWidth, wheelHeight, dualWheelGap, wheels.rearLeft)
+        drawRearDualWheelSet(ctx, rearAxleBack, outerWheelY, wheelWidth, wheelHeight, dualWheelGap, wheels.rearRight)
+        drawRearDualWheelSet(ctx, rearAxleFront, -outerWheelY, wheelWidth, wheelHeight, dualWheelGap, wheels.rearLeft)
+        drawRearDualWheelSet(ctx, rearAxleFront, outerWheelY, wheelWidth, wheelHeight, dualWheelGap, wheels.rearRight)
+        drawWheel(ctx, steerAxleX, -outerWheelY, wheelWidth, wheelHeight, wheels.frontLeft)
+        drawWheel(ctx, steerAxleX, outerWheelY, wheelWidth, wheelHeight, wheels.frontRight)
 
         if (wheelsOnly) {
             return
@@ -118,15 +117,15 @@ window.CarSimVehicleAppearance = (function() {
         ctx.restore()
     }
 
-    function drawRearDualWheelSet(ctx, centerX, centerY, width, height, gap) {
-        drawWheel(ctx, centerX - gap * 0.5, centerY, width, height, 0)
-        drawWheel(ctx, centerX + gap * 0.5, centerY, width, height, 0)
+    function drawRearDualWheelSet(ctx, centerX, centerY, width, height, gap, wheelState) {
+        drawWheel(ctx, centerX - gap * 0.5, centerY, width, height, wheelState)
+        drawWheel(ctx, centerX + gap * 0.5, centerY, width, height, wheelState)
     }
 
-    function drawWheel(ctx, centerX, centerY, width, height, angle) {
+    function drawWheel(ctx, centerX, centerY, width, height, wheelState) {
         ctx.save()
         ctx.translate(centerX, centerY)
-        ctx.rotate(angle)
+        ctx.rotate((wheelState.steeringAngle || 0) * Math.PI / 180)
         ctx.fillStyle = "rgb(18, 18, 18)"
         roundRect(ctx, -width / 2, -height / 2, width, height, 4)
         ctx.fill()
@@ -134,6 +133,20 @@ window.CarSimVehicleAppearance = (function() {
         ctx.fillStyle = "rgb(128, 132, 136)"
         roundRect(ctx, -width * 0.16, -height * 0.34, width * 0.32, height * 0.68, 3)
         ctx.fill()
+
+        drawWheelSpinIndicator(ctx, width, height, wheelState.spinAngle || 0)
+        ctx.restore()
+    }
+
+    function drawWheelSpinIndicator(ctx, width, height, spinAngle) {
+        ctx.save()
+        ctx.rotate(spinAngle)
+        ctx.strokeStyle = "rgba(225, 225, 225, 0.75)"
+        ctx.lineWidth = 1.5
+        ctx.beginPath()
+        ctx.moveTo(0, -height * 0.32)
+        ctx.lineTo(0, height * 0.32)
+        ctx.stroke()
         ctx.restore()
     }
 

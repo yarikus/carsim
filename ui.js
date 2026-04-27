@@ -75,7 +75,7 @@ window.CarSimUI = (function() {
     }
 
     function drawCar(ctx, state) {
-        window.CarSimVehicleAppearance.drawCar(ctx, state.car, {
+        window.CarSimVehicleAppearance.drawCar(ctx, state.car, state.wheels, {
             wheelsOnly: state.modelDebugWheelsOnly
         })
     }
