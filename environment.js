@@ -15,6 +15,7 @@ window.CarSimEnvironment = (function() {
         ctx.translate(canvas.width / 2 - cameraX, canvas.height / 2 - cameraY)
         drawSurface(ctx, canvas, cameraX, cameraY)
         drawWheelTrails(ctx, state)
+        drawDebugHitboxes(ctx, state)
         ctx.restore()
     }
 
@@ -95,6 +96,70 @@ window.CarSimEnvironment = (function() {
 
         ctx.stroke()
         ctx.restore()
+    }
+
+    function drawDebugHitboxes(ctx, state) {
+        var hitboxes
+        var i
+
+        if (!state.debugShowHitboxes) {
+            return
+        }
+
+        hitboxes = window.CarSimPhysics.getDebugHitboxes(state)
+
+        for (i = 0; i < hitboxes.length; i++) {
+            drawOrientedHitbox(ctx, hitboxes[i])
+        }
+    }
+
+    function drawOrientedHitbox(ctx, hitboxEntry) {
+        var vertices = getOrientedBoxVertices(hitboxEntry.box)
+
+        ctx.save()
+        ctx.fillStyle = hitboxEntry.fillStyle
+        ctx.strokeStyle = hitboxEntry.strokeStyle
+        ctx.lineWidth = 2
+        ctx.setLineDash([10, 6])
+        ctx.beginPath()
+        ctx.moveTo(vertices[0].x, vertices[0].y)
+        ctx.lineTo(vertices[1].x, vertices[1].y)
+        ctx.lineTo(vertices[2].x, vertices[2].y)
+        ctx.lineTo(vertices[3].x, vertices[3].y)
+        ctx.closePath()
+        ctx.fill()
+        ctx.stroke()
+        ctx.setLineDash([])
+
+        ctx.fillStyle = hitboxEntry.strokeStyle
+        ctx.beginPath()
+        ctx.arc(hitboxEntry.box.centerX, hitboxEntry.box.centerY, 3.5, 0, Math.PI * 2)
+        ctx.fill()
+
+        ctx.font = "12px Arial"
+        ctx.fillText(hitboxEntry.label, hitboxEntry.box.centerX + 8, hitboxEntry.box.centerY - 8)
+        ctx.restore()
+    }
+
+    function getOrientedBoxVertices(box) {
+        var halfWidth = box.width / 2
+        var halfHeight = box.height / 2
+        var cosAngle = Math.cos(box.angle)
+        var sinAngle = Math.sin(box.angle)
+
+        return [
+            rotatePoint(box.centerX, box.centerY, -halfWidth, -halfHeight, cosAngle, sinAngle),
+            rotatePoint(box.centerX, box.centerY, halfWidth, -halfHeight, cosAngle, sinAngle),
+            rotatePoint(box.centerX, box.centerY, halfWidth, halfHeight, cosAngle, sinAngle),
+            rotatePoint(box.centerX, box.centerY, -halfWidth, halfHeight, cosAngle, sinAngle)
+        ]
+    }
+
+    function rotatePoint(centerX, centerY, localX, localY, cosAngle, sinAngle) {
+        return {
+            x: centerX + localX * cosAngle - localY * sinAngle,
+            y: centerY + localX * sinAngle + localY * cosAngle
+        }
     }
 
     return {

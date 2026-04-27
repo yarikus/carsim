@@ -49,6 +49,7 @@ window.CarSimPhysics = (function() {
             },
             modelDebugWheelsOnly: false,
             debugWheelTrails: false,
+            debugShowHitboxes: false,
             debugDetachTrailer: false,
             wheelTrails: {
                 frontLeft: [],
@@ -477,12 +478,30 @@ window.CarSimPhysics = (function() {
         state.wheelTrails.rearRight = []
     }
 
+    function getDebugHitboxes(state) {
+        return [
+            {
+                label: "Tractor",
+                strokeStyle: "rgba(87, 214, 255, 0.95)",
+                fillStyle: "rgba(87, 214, 255, 0.12)",
+                box: getCarCollisionBox(state.car)
+            },
+            {
+                label: "Trailer",
+                strokeStyle: "rgba(255, 176, 64, 0.95)",
+                fillStyle: "rgba(255, 176, 64, 0.12)",
+                box: getTrailerCollisionBox(state.trailer)
+            }
+        ]
+    }
+
     return {
         createState: createState,
         initializeWorld: initializeWorld,
         moveCar: moveCar,
         processKeys: processKeys,
         clearWheelTrails: clearWheelTrails,
+        getDebugHitboxes: getDebugHitboxes,
         resetTrailerToHitch: resetTrailerToHitch,
         releaseTrailerFromHitch: releaseTrailerFromHitch,
         getCarCenter: getCarCenter

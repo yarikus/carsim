@@ -5,6 +5,7 @@ window.CarSimUI = (function() {
         var configControls = document.querySelectorAll("[data-config]")
         var debugToggle = document.getElementById("modelDebugToggle")
         var wheelTrailToggle = document.getElementById("wheelTrailsToggle")
+        var hitboxToggle = document.getElementById("hitboxDebugToggle")
         var i
 
         for (i = 0; i < configControls.length; i++) {
@@ -31,6 +32,13 @@ window.CarSimUI = (function() {
                 if (!state.debugWheelTrails) {
                     window.CarSimPhysics.clearWheelTrails(state)
                 }
+            })
+        }
+
+        if (hitboxToggle) {
+            hitboxToggle.checked = state.debugShowHitboxes
+            hitboxToggle.addEventListener("change", function(evt) {
+                state.debugShowHitboxes = evt.target.checked
             })
         }
 
