@@ -125,6 +125,24 @@
                 line-height: 1.5;
             }
 
+            .sidebar-section {
+                margin-top: 28px;
+                padding-top: 18px;
+                border-top: 1px solid rgba(255, 255, 255, 0.08);
+            }
+
+            .sidebar-section h3 {
+                margin: 0 0 8px;
+                font-size: 16px;
+                font-weight: 700;
+                letter-spacing: 0.02em;
+            }
+
+            .sidebar-section p {
+                margin-bottom: 14px;
+                font-size: 13px;
+            }
+
             .control-group {
                 margin-bottom: 18px;
             }
@@ -257,12 +275,24 @@
                 <input class="control-slider" id="steeringAngleControl" data-config="maxSteeringAngle" type="range" min="10" max="45" step="1" value="28">
             </div>
 
-            <div class="control-group">
-                <label class="control-checkbox" for="modelDebugToggle">
-                    <input id="modelDebugToggle" type="checkbox">
-                    <span>Debug wheels only</span>
-                </label>
-            </div>
+            <section class="sidebar-section">
+                <h3>Debug</h3>
+                <p>Инструменты для проверки кинематики и поведения модели.</p>
+
+                <div class="control-group">
+                    <label class="control-checkbox" for="modelDebugToggle">
+                        <input id="modelDebugToggle" type="checkbox">
+                        <span>Debug wheels only</span>
+                    </label>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-checkbox" for="wheelTrailsToggle">
+                        <input id="wheelTrailsToggle" type="checkbox">
+                        <span>Wheel trails</span>
+                    </label>
+                </div>
+            </section>
         </aside>
         <script src="physics.js"></script>
         <script src="environment.js"></script>

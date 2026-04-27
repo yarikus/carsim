@@ -26,7 +26,7 @@ function draw() {
     window.CarSimPhysics.moveCar(state)
 
     ctx.clearRect(0, 0, canvas.width, canvas.height)
-    window.CarSimEnvironment.drawEnvironment(ctx, canvas, state.car)
+    window.CarSimEnvironment.drawEnvironment(ctx, canvas, state)
 
     ctx.save()
     ctx.translate(canvas.width / 2, canvas.height / 2)

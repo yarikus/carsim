@@ -36,6 +36,13 @@ window.CarSimPhysics = (function() {
                 maxSteeringAngle: 28
             },
             modelDebugWheelsOnly: false,
+            debugWheelTrails: false,
+            wheelTrails: {
+                frontLeft: [],
+                frontRight: [],
+                rearLeft: [],
+                rearRight: []
+            },
             keyArray: [],
             musicOn: true
         }
@@ -76,6 +83,7 @@ window.CarSimPhysics = (function() {
         car.displayVelocity = Math.abs(Math.round(car.velocity * 15))
 
         updateWheelSpin(state)
+        updateWheelTrails(state)
     }
 
     function processKeys(state, music) {
@@ -165,10 +173,76 @@ window.CarSimPhysics = (function() {
         }
     }
 
+    function updateWheelTrails(state) {
+        var wheelPositions
+        var wheelKeys
+        var i
+        var key
+
+        if (!state.debugWheelTrails) {
+            return
+        }
+
+        if (Math.abs(state.car.velocity) < 0.05) {
+            return
+        }
+
+        wheelPositions = getWheelWorldPositions(state)
+        wheelKeys = Object.keys(wheelPositions)
+
+        for (i = 0; i < wheelKeys.length; i++) {
+            key = wheelKeys[i]
+            state.wheelTrails[key].push({
+                x: wheelPositions[key].x,
+                y: wheelPositions[key].y
+            })
+
+            if (state.wheelTrails[key].length > 180) {
+                state.wheelTrails[key].shift()
+            }
+        }
+    }
+
+    function getWheelWorldPositions(state) {
+        var car = state.car
+        var centerX = car.xPosition + car.width / 2
+        var centerY = car.yPosition + car.height / 2
+        var angle = car.facingAngle * Math.PI / 180
+        var cosAngle = Math.cos(angle)
+        var sinAngle = Math.sin(angle)
+        var steerAxleX = car.width * 0.34
+        var rearAxleFront = -car.width * 0.17
+        var rearAxleBack = rearAxleFront - car.width * 0.12
+        var rearAxleCenter = (rearAxleFront + rearAxleBack) / 2
+        var outerWheelY = car.height * 0.42
+
+        return {
+            frontLeft: projectWheel(centerX, centerY, cosAngle, sinAngle, steerAxleX, -outerWheelY),
+            frontRight: projectWheel(centerX, centerY, cosAngle, sinAngle, steerAxleX, outerWheelY),
+            rearLeft: projectWheel(centerX, centerY, cosAngle, sinAngle, rearAxleCenter, -outerWheelY),
+            rearRight: projectWheel(centerX, centerY, cosAngle, sinAngle, rearAxleCenter, outerWheelY)
+        }
+    }
+
+    function projectWheel(centerX, centerY, cosAngle, sinAngle, localX, localY) {
+        return {
+            x: centerX + localX * cosAngle - localY * sinAngle,
+            y: centerY + localX * sinAngle + localY * cosAngle
+        }
+    }
+
+    function clearWheelTrails(state) {
+        state.wheelTrails.frontLeft = []
+        state.wheelTrails.frontRight = []
+        state.wheelTrails.rearLeft = []
+        state.wheelTrails.rearRight = []
+    }
+
     return {
         createState: createState,
         initializeWorld: initializeWorld,
         moveCar: moveCar,
-        processKeys: processKeys
+        processKeys: processKeys,
+        clearWheelTrails: clearWheelTrails
     }
 })()

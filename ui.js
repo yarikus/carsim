@@ -4,6 +4,7 @@ window.CarSimUI = (function() {
     function initializeControls(state) {
         var configControls = document.querySelectorAll("[data-config]")
         var debugToggle = document.getElementById("modelDebugToggle")
+        var wheelTrailToggle = document.getElementById("wheelTrailsToggle")
         var i
 
         for (i = 0; i < configControls.length; i++) {
@@ -20,6 +21,16 @@ window.CarSimUI = (function() {
             debugToggle.checked = state.modelDebugWheelsOnly
             debugToggle.addEventListener("change", function(evt) {
                 state.modelDebugWheelsOnly = evt.target.checked
+            })
+        }
+
+        if (wheelTrailToggle) {
+            wheelTrailToggle.checked = state.debugWheelTrails
+            wheelTrailToggle.addEventListener("change", function(evt) {
+                state.debugWheelTrails = evt.target.checked
+                if (!state.debugWheelTrails) {
+                    window.CarSimPhysics.clearWheelTrails(state)
+                }
             })
         }
     }
