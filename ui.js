@@ -77,67 +77,110 @@ window.CarSimUI = (function() {
             ctx.stroke()
         }
 
-        var bodyWidth = car.width * 0.72
+        var sleeperLength = car.width * 0.22
+        var cabLength = car.width * 0.18
+        var hoodLength = car.width * 0.26
+        var frameLength = car.width * 0.28
         var bodyHeight = car.height * 0.72
-        var cabinWidth = car.width * 0.34
-        var cabinHeight = car.height * 0.48
-        var wheelWidth = car.width * 0.14
-        var wheelHeight = car.height * 0.26
-        var wheelOffsetX = car.width * 0.23
-        var wheelOffsetY = car.height * 0.41
+        var hoodHeight = car.height * 0.5
+        var sleeperHeight = car.height * 0.66
+        var axleSpread = car.width * 0.18
+        var rearAxleFront = -car.width * 0.17
+        var rearAxleBack = rearAxleFront - car.width * 0.12
+        var steerAxleX = car.width * 0.34
+        var outerWheelY = car.height * 0.42
         var frontWheelAngle = car.steeringAngle * Math.PI / 180
+        var wheelWidth = car.width * 0.115
+        var wheelHeight = car.height * 0.18
+        var dualWheelGap = car.height * 0.09
+        var sleeperStart = -car.width * 0.16
+        var cabStart = sleeperStart + sleeperLength * 0.72
+        var hoodStart = cabStart + cabLength * 0.58
+        var stackX = sleeperStart - car.width * 0.01
 
-        drawShadow(ctx, bodyWidth, bodyHeight)
-        drawWheel(ctx, -wheelOffsetX, -wheelOffsetY, wheelWidth, wheelHeight, 0)
-        drawWheel(ctx, wheelOffsetX, -wheelOffsetY, wheelWidth, wheelHeight, frontWheelAngle)
-        drawWheel(ctx, -wheelOffsetX, wheelOffsetY, wheelWidth, wheelHeight, 0)
-        drawWheel(ctx, wheelOffsetX, wheelOffsetY, wheelWidth, wheelHeight, frontWheelAngle)
+        drawTruckShadow(ctx, car)
 
-        ctx.fillStyle = "rgb(150, 155, 160)"
-        roundRect(ctx, -bodyWidth / 2, -bodyHeight / 2, bodyWidth, bodyHeight, 12)
+        drawRearDualWheelSet(ctx, rearAxleBack, -outerWheelY, wheelWidth, wheelHeight, dualWheelGap)
+        drawRearDualWheelSet(ctx, rearAxleBack, outerWheelY, wheelWidth, wheelHeight, dualWheelGap)
+        drawRearDualWheelSet(ctx, rearAxleFront, -outerWheelY, wheelWidth, wheelHeight, dualWheelGap)
+        drawRearDualWheelSet(ctx, rearAxleFront, outerWheelY, wheelWidth, wheelHeight, dualWheelGap)
+        drawWheel(ctx, steerAxleX, -outerWheelY, wheelWidth, wheelHeight, frontWheelAngle)
+        drawWheel(ctx, steerAxleX, outerWheelY, wheelWidth, wheelHeight, frontWheelAngle)
+
+        ctx.fillStyle = "rgb(74, 80, 86)"
+        roundRect(ctx, -car.width * 0.34, -car.height * 0.12, frameLength, car.height * 0.24, 6)
         ctx.fill()
 
-        ctx.fillStyle = "rgb(92, 99, 106)"
-        roundRect(ctx, -car.width * 0.08, -bodyHeight / 2, car.width * 0.44, bodyHeight, 12)
+        ctx.fillStyle = "rgb(170, 28, 28)"
+        roundRect(ctx, sleeperStart, -sleeperHeight / 2, sleeperLength, sleeperHeight, 11)
+        ctx.fill()
+        roundRect(ctx, cabStart, -bodyHeight / 2, cabLength, bodyHeight, 11)
         ctx.fill()
 
-        ctx.fillStyle = "rgb(68, 74, 80)"
-        roundRect(ctx, car.width * 0.12, -bodyHeight * 0.4, car.width * 0.15, bodyHeight * 0.8, 10)
+        ctx.fillStyle = "rgb(185, 189, 194)"
+        roundRect(ctx, hoodStart, -hoodHeight / 2, hoodLength, hoodHeight, 10)
+        ctx.fill()
+
+        ctx.fillStyle = "rgb(125, 130, 136)"
+        roundRect(ctx, hoodStart + hoodLength * 0.62, -hoodHeight * 0.4, hoodLength * 0.2, hoodHeight * 0.8, 8)
         ctx.fill()
 
         ctx.fillStyle = "rgb(42, 47, 53)"
-        roundRect(ctx, -cabinWidth / 2, -cabinHeight / 2, cabinWidth, cabinHeight, 10)
+        roundRect(ctx, sleeperStart + car.width * 0.025, -sleeperHeight * 0.42, sleeperLength * 0.34, sleeperHeight * 0.84, 7)
+        ctx.fill()
+        roundRect(ctx, cabStart + car.width * 0.015, -bodyHeight * 0.4, cabLength * 0.44, bodyHeight * 0.8, 7)
         ctx.fill()
 
-        ctx.fillStyle = "rgba(170, 192, 210, 0.72)"
-        roundRect(ctx, -cabinWidth * 0.08, -cabinHeight * 0.34, cabinWidth * 0.42, cabinHeight * 0.68, 6)
+        ctx.fillStyle = "rgba(163, 188, 206, 0.74)"
+        roundRect(ctx, cabStart + cabLength * 0.1, -bodyHeight * 0.32, cabLength * 0.26, bodyHeight * 0.64, 6)
         ctx.fill()
-        roundRect(ctx, -cabinWidth * 0.48, -cabinHeight * 0.34, cabinWidth * 0.22, cabinHeight * 0.68, 5)
+        roundRect(ctx, sleeperStart + sleeperLength * 0.18, -sleeperHeight * 0.22, sleeperLength * 0.16, sleeperHeight * 0.44, 5)
         ctx.fill()
 
-        ctx.fillStyle = "rgb(36, 39, 42)"
-        roundRect(ctx, -car.width * 0.04, -bodyHeight * 0.52, car.width * 0.045, bodyHeight * 1.04, 4)
+        ctx.fillStyle = "rgb(28, 30, 33)"
+        roundRect(ctx, hoodStart - car.width * 0.01, -car.height * 0.46, car.width * 0.02, car.height * 0.92, 5)
+        ctx.fill()
+
+        ctx.fillStyle = "rgb(198, 202, 206)"
+        roundRect(ctx, stackX, -car.height * 0.47, car.width * 0.03, car.height * 0.22, 4)
+        ctx.fill()
+        roundRect(ctx, stackX, car.height * 0.25, car.width * 0.03, car.height * 0.22, 4)
+        ctx.fill()
+
+        ctx.fillStyle = "rgb(144, 148, 152)"
+        roundRect(ctx, sleeperStart + car.width * 0.01, -car.height * 0.46, car.width * 0.08, car.height * 0.12, 5)
+        ctx.fill()
+        roundRect(ctx, sleeperStart + car.width * 0.01, car.height * 0.34, car.width * 0.08, car.height * 0.12, 5)
         ctx.fill()
 
         ctx.fillStyle = "rgb(236, 238, 214)"
-        roundRect(ctx, car.width * 0.34, -bodyHeight * 0.34, car.width * 0.06, car.height * 0.12, 4)
+        roundRect(ctx, hoodStart + hoodLength * 0.85, -hoodHeight * 0.35, car.width * 0.04, car.height * 0.12, 4)
         ctx.fill()
-        roundRect(ctx, car.width * 0.34, bodyHeight * 0.22, car.width * 0.06, car.height * 0.12, 4)
+        roundRect(ctx, hoodStart + hoodLength * 0.85, hoodHeight * 0.23, car.width * 0.04, car.height * 0.12, 4)
         ctx.fill()
 
         ctx.fillStyle = "rgb(184, 42, 42)"
-        roundRect(ctx, -car.width * 0.4, -bodyHeight * 0.34, car.width * 0.05, car.height * 0.12, 4)
+        roundRect(ctx, -car.width * 0.38, -car.height * 0.22, car.width * 0.04, car.height * 0.12, 4)
         ctx.fill()
-        roundRect(ctx, -car.width * 0.4, bodyHeight * 0.22, car.width * 0.05, car.height * 0.12, 4)
+        roundRect(ctx, -car.width * 0.38, car.height * 0.1, car.width * 0.04, car.height * 0.12, 4)
+        ctx.fill()
+
+        ctx.fillStyle = "rgb(92, 96, 100)"
+        roundRect(ctx, -car.width * 0.24, -car.height * 0.17, car.width * 0.12, car.height * 0.34, 5)
         ctx.fill()
     }
 
-    function drawShadow(ctx, bodyWidth, bodyHeight) {
+    function drawTruckShadow(ctx, car) {
         ctx.save()
-        ctx.fillStyle = "rgba(0, 0, 0, 0.2)"
-        roundRect(ctx, -bodyWidth * 0.52, -bodyHeight * 0.62, bodyWidth * 1.04, bodyHeight * 1.24, 14)
+        ctx.fillStyle = "rgba(0, 0, 0, 0.22)"
+        roundRect(ctx, -car.width * 0.4, -car.height * 0.42, car.width * 0.86, car.height * 0.84, 14)
         ctx.fill()
         ctx.restore()
+    }
+
+    function drawRearDualWheelSet(ctx, centerX, centerY, width, height, gap) {
+        drawWheel(ctx, centerX - gap * 0.5, centerY, width, height, 0)
+        drawWheel(ctx, centerX + gap * 0.5, centerY, width, height, 0)
     }
 
     function drawWheel(ctx, centerX, centerY, width, height, angle) {
@@ -148,8 +191,8 @@ window.CarSimUI = (function() {
         roundRect(ctx, -width / 2, -height / 2, width, height, 4)
         ctx.fill()
 
-        ctx.fillStyle = "rgb(116, 118, 120)"
-        roundRect(ctx, -width * 0.2, -height * 0.34, width * 0.4, height * 0.68, 3)
+        ctx.fillStyle = "rgb(128, 132, 136)"
+        roundRect(ctx, -width * 0.16, -height * 0.34, width * 0.32, height * 0.68, 3)
         ctx.fill()
         ctx.restore()
     }
