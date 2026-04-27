@@ -19,7 +19,18 @@ window.CarSimPhysics = (function() {
                 steeringAngle: 0,
                 wheelBase: 92,
                 frontTrack: 42,
-                rearTrack: 42
+                rearTrack: 42,
+                hitchOffset: -86
+            },
+            trailer: {
+                width: 212,
+                height: 54,
+                xPosition: 0,
+                yPosition: 0,
+                facingAngle: 0,
+                kingpinOffset: 92,
+                axleOffset: -62,
+                wheelTrack: 40
             },
             wheels: {
                 frontLeft: createWheelState(),
@@ -37,6 +48,7 @@ window.CarSimPhysics = (function() {
             },
             modelDebugWheelsOnly: false,
             debugWheelTrails: false,
+            debugDetachTrailer: false,
             wheelTrails: {
                 frontLeft: [],
                 frontRight: [],
@@ -58,6 +70,7 @@ window.CarSimPhysics = (function() {
     function initializeWorld(state) {
         state.car.xPosition = -state.car.width / 2
         state.car.yPosition = -state.car.height / 2
+        resetTrailerToHitch(state)
     }
 
     function moveCar(state) {
@@ -82,6 +95,7 @@ window.CarSimPhysics = (function() {
         car.yPosition += car.velocity * Math.sin(car.facingAngle * Math.PI / 180)
         car.displayVelocity = Math.abs(Math.round(car.velocity * 15))
 
+        updateTrailer(state)
         updateWheelSpin(state)
         updateWheelTrails(state)
     }
@@ -173,6 +187,52 @@ window.CarSimPhysics = (function() {
         }
     }
 
+    function updateTrailer(state) {
+        var trailer = state.trailer
+        var hitchPosition
+        var directionToHitch
+        var trailerAngleRadians
+
+        if (state.debugDetachTrailer) {
+            return
+        }
+
+        hitchPosition = getCarHitchPosition(state.car)
+        directionToHitch = Math.atan2(hitchPosition.y - trailer.yPosition, hitchPosition.x - trailer.xPosition)
+        trailer.facingAngle = directionToHitch * 180 / Math.PI
+
+        trailerAngleRadians = trailer.facingAngle * Math.PI / 180
+        trailer.xPosition = hitchPosition.x - Math.cos(trailerAngleRadians) * trailer.kingpinOffset
+        trailer.yPosition = hitchPosition.y - Math.sin(trailerAngleRadians) * trailer.kingpinOffset
+    }
+
+    function resetTrailerToHitch(state) {
+        var hitchPosition = getCarHitchPosition(state.car)
+        var trailer = state.trailer
+        var angleRadians = state.car.facingAngle * Math.PI / 180
+
+        trailer.facingAngle = state.car.facingAngle
+        trailer.xPosition = hitchPosition.x - Math.cos(angleRadians) * trailer.kingpinOffset
+        trailer.yPosition = hitchPosition.y - Math.sin(angleRadians) * trailer.kingpinOffset
+    }
+
+    function getCarCenter(car) {
+        return {
+            x: car.xPosition + car.width / 2,
+            y: car.yPosition + car.height / 2
+        }
+    }
+
+    function getCarHitchPosition(car) {
+        var center = getCarCenter(car)
+        var angle = car.facingAngle * Math.PI / 180
+
+        return {
+            x: center.x + Math.cos(angle) * car.hitchOffset,
+            y: center.y + Math.sin(angle) * car.hitchOffset
+        }
+    }
+
     function updateWheelTrails(state) {
         var wheelPositions
         var wheelKeys
@@ -243,6 +303,8 @@ window.CarSimPhysics = (function() {
         initializeWorld: initializeWorld,
         moveCar: moveCar,
         processKeys: processKeys,
-        clearWheelTrails: clearWheelTrails
+        clearWheelTrails: clearWheelTrails,
+        resetTrailerToHitch: resetTrailerToHitch,
+        getCarCenter: getCarCenter
     }
 })()

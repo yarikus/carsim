@@ -33,6 +33,8 @@ window.CarSimUI = (function() {
                 }
             })
         }
+
+        initializeDetachTrailerToggle(state)
     }
 
     function initializeMusicButton(state, music, musicToggle) {
@@ -91,6 +93,30 @@ window.CarSimUI = (function() {
         })
     }
 
+    function drawTrailer(ctx, state) {
+        if (state.modelDebugWheelsOnly) {
+            return
+        }
+
+        window.CarSimVehicleAppearance.drawTrailer(ctx, state.trailer)
+    }
+
+    function initializeDetachTrailerToggle(state) {
+        var detachTrailerToggle = document.getElementById("detachTrailerToggle")
+
+        if (!detachTrailerToggle) {
+            return
+        }
+
+        detachTrailerToggle.checked = state.debugDetachTrailer
+        detachTrailerToggle.addEventListener("change", function(evt) {
+            state.debugDetachTrailer = evt.target.checked
+            if (!state.debugDetachTrailer) {
+                window.CarSimPhysics.resetTrailerToHitch(state)
+            }
+        })
+    }
+
     function syncControlValue(control) {
         var valueLabel = document.querySelector('[data-value-for="' + control.id + '"]')
 
@@ -120,6 +146,7 @@ window.CarSimUI = (function() {
         initializeMusicButton: initializeMusicButton,
         musicControl: musicControl,
         drawHud: drawHud,
-        drawCar: drawCar
+        drawCar: drawCar,
+        drawTrailer: drawTrailer
     }
 })()
