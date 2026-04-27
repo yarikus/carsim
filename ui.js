@@ -98,7 +98,7 @@ window.CarSimUI = (function() {
             return
         }
 
-        window.CarSimVehicleAppearance.drawTrailer(ctx, state.trailer)
+        window.CarSimTrailerAppearance.drawTrailer(ctx, state.trailer)
     }
 
     function initializeDetachTrailerToggle(state) {
