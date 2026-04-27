@@ -109,7 +109,9 @@ window.CarSimUI = (function() {
         detachTrailerToggle.checked = state.debugDetachTrailer
         detachTrailerToggle.addEventListener("change", function(evt) {
             state.debugDetachTrailer = evt.target.checked
-            if (!state.debugDetachTrailer) {
+            if (state.debugDetachTrailer) {
+                window.CarSimPhysics.releaseTrailerFromHitch(state)
+            } else {
                 window.CarSimPhysics.resetTrailerToHitch(state)
             }
         })

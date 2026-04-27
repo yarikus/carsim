@@ -3,12 +3,13 @@
 window.CarSimPhysics = (function() {
     var steeringReturnSpeed = 2.2
     var steeringResponse = 0.22
+    var maxArticulationAngle = 78
 
     function createState() {
         return {
             car: {
-                width: 148,
-                height: 56,
+                width: 156,
+                height: 58,
                 xPosition: 0,
                 yPosition: 0,
                 velocity: 0,
@@ -17,20 +18,20 @@ window.CarSimPhysics = (function() {
                 forceBackward: 0,
                 facingAngle: 0,
                 steeringAngle: 0,
-                wheelBase: 92,
-                frontTrack: 42,
-                rearTrack: 42,
-                hitchOffset: -44
+                wheelBase: 96,
+                frontTrack: 44,
+                rearTrack: 44,
+                hitchOffset: -36
             },
             trailer: {
-                width: 320,
+                width: 352,
                 height: 58,
                 xPosition: 0,
                 yPosition: 0,
                 facingAngle: 0,
                 kingpinOffset: 0,
-                axleOffset: -188,
-                wheelTrack: 42
+                axleOffset: -224,
+                wheelTrack: 44
             },
             wheels: {
                 frontLeft: createWheelState(),
@@ -78,12 +79,16 @@ window.CarSimPhysics = (function() {
         var wheels = state.wheels
         var physicsConfig = state.physicsConfig
         var steeringAverageRadians
+        var previousCarState
+        var previousTrailerState
 
         if (car.velocity !== 0) {
             car.forceFoward *= physicsConfig.surfaceFriction
             car.forceBackward *= physicsConfig.surfaceFriction
         }
 
+        previousCarState = captureBodyState(car)
+        previousTrailerState = captureBodyState(state.trailer)
         car.velocity = Number((car.forceFoward - car.forceBackward).toFixed(3))
         steeringAverageRadians = ((wheels.frontLeft.steeringAngle + wheels.frontRight.steeringAngle) * 0.5) * Math.PI / 180
 
@@ -96,6 +101,7 @@ window.CarSimPhysics = (function() {
         car.displayVelocity = Math.abs(Math.round(car.velocity * 15))
 
         updateTrailer(state)
+        resolveTrailerCollision(state, previousCarState, previousTrailerState)
         updateWheelSpin(state)
         updateWheelTrails(state)
     }
@@ -201,9 +207,26 @@ window.CarSimPhysics = (function() {
         axlePosition = getTrailerAxlePosition(trailer)
         directionFromAxleToKingpin = Math.atan2(hitchPosition.y - axlePosition.y, hitchPosition.x - axlePosition.x)
 
-        trailer.facingAngle = directionFromAxleToKingpin * 180 / Math.PI
+        trailer.facingAngle = clampArticulationAngle(state.car.facingAngle, directionFromAxleToKingpin * 180 / Math.PI)
         trailer.xPosition = hitchPosition.x
         trailer.yPosition = hitchPosition.y
+    }
+
+    function resolveTrailerCollision(state, previousCarState, previousTrailerState) {
+        if (!state.debugDetachTrailer) {
+            return
+        }
+
+        if (!bodiesColliding(getCarCollisionBox(state.car), getTrailerCollisionBox(state.trailer))) {
+            return
+        }
+
+        restoreBodyState(state.car, previousCarState)
+        restoreBodyState(state.trailer, previousTrailerState)
+        state.car.velocity = 0
+        state.car.forceFoward = 0
+        state.car.forceBackward = 0
+        state.car.displayVelocity = 0
     }
 
     function resetTrailerToHitch(state) {
@@ -213,6 +236,15 @@ window.CarSimPhysics = (function() {
         trailer.facingAngle = state.car.facingAngle
         trailer.xPosition = hitchPosition.x
         trailer.yPosition = hitchPosition.y
+    }
+
+    function releaseTrailerFromHitch(state) {
+        var trailer = state.trailer
+        var angle = trailer.facingAngle * Math.PI / 180
+        var releaseDistance = Math.max(72, trailer.width * 0.22)
+
+        trailer.xPosition -= Math.cos(angle) * releaseDistance
+        trailer.yPosition -= Math.sin(angle) * releaseDistance
     }
 
     function getCarCenter(car) {
@@ -239,6 +271,145 @@ window.CarSimPhysics = (function() {
             x: trailer.xPosition + Math.cos(angle) * trailer.axleOffset,
             y: trailer.yPosition + Math.sin(angle) * trailer.axleOffset
         }
+    }
+
+    function clampArticulationAngle(tractorAngle, trailerAngle) {
+        var delta = normalizeAngleDegrees(trailerAngle - tractorAngle)
+        var clampedDelta = Math.max(-maxArticulationAngle, Math.min(maxArticulationAngle, delta))
+
+        return normalizeAngleDegrees(tractorAngle + clampedDelta)
+    }
+
+    function normalizeAngleDegrees(angle) {
+        var normalized = angle
+
+        while (normalized > 180) {
+            normalized -= 360
+        }
+
+        while (normalized < -180) {
+            normalized += 360
+        }
+
+        return normalized
+    }
+
+    function getCarCollisionBox(car) {
+        return {
+            centerX: car.xPosition + car.width / 2 + Math.cos(car.facingAngle * Math.PI / 180) * (car.width * 0.06),
+            centerY: car.yPosition + car.height / 2 + Math.sin(car.facingAngle * Math.PI / 180) * (car.width * 0.06),
+            width: car.width * 0.72,
+            height: car.height * 0.68,
+            angle: car.facingAngle * Math.PI / 180
+        }
+    }
+
+    function getTrailerCollisionBox(trailer) {
+        var bodyLength = trailer.width * 0.84
+        var localCenterX = -bodyLength * 0.5 + trailer.width * 0.12
+        var angle = trailer.facingAngle * Math.PI / 180
+
+        return {
+            centerX: trailer.xPosition + Math.cos(angle) * localCenterX,
+            centerY: trailer.yPosition + Math.sin(angle) * localCenterX,
+            width: bodyLength,
+            height: trailer.height * 0.82,
+            angle: angle
+        }
+    }
+
+    function bodiesColliding(a, b) {
+        var polygons = [getOrientedBoxVertices(a), getOrientedBoxVertices(b)]
+        var axes = getPolygonAxes(polygons[0]).concat(getPolygonAxes(polygons[1]))
+        var i
+
+        for (i = 0; i < axes.length; i++) {
+            if (!projectionsOverlap(projectPolygon(polygons[0], axes[i]), projectPolygon(polygons[1], axes[i]))) {
+                return false
+            }
+        }
+
+        return true
+    }
+
+    function getOrientedBoxVertices(box) {
+        var halfWidth = box.width / 2
+        var halfHeight = box.height / 2
+        var cosAngle = Math.cos(box.angle)
+        var sinAngle = Math.sin(box.angle)
+
+        return [
+            rotatePoint(box.centerX, box.centerY, -halfWidth, -halfHeight, cosAngle, sinAngle),
+            rotatePoint(box.centerX, box.centerY, halfWidth, -halfHeight, cosAngle, sinAngle),
+            rotatePoint(box.centerX, box.centerY, halfWidth, halfHeight, cosAngle, sinAngle),
+            rotatePoint(box.centerX, box.centerY, -halfWidth, halfHeight, cosAngle, sinAngle)
+        ]
+    }
+
+    function rotatePoint(centerX, centerY, localX, localY, cosAngle, sinAngle) {
+        return {
+            x: centerX + localX * cosAngle - localY * sinAngle,
+            y: centerY + localX * sinAngle + localY * cosAngle
+        }
+    }
+
+    function getPolygonAxes(vertices) {
+        var axes = []
+        var i
+        var nextIndex
+        var edgeX
+        var edgeY
+        var length
+
+        for (i = 0; i < vertices.length; i++) {
+            nextIndex = (i + 1) % vertices.length
+            edgeX = vertices[nextIndex].x - vertices[i].x
+            edgeY = vertices[nextIndex].y - vertices[i].y
+            length = Math.hypot(edgeX, edgeY)
+
+            axes.push({
+                x: -edgeY / length,
+                y: edgeX / length
+            })
+        }
+
+        return axes
+    }
+
+    function projectPolygon(vertices, axis) {
+        var projection = vertices[0].x * axis.x + vertices[0].y * axis.y
+        var min = projection
+        var max = projection
+        var i
+
+        for (i = 1; i < vertices.length; i++) {
+            projection = vertices[i].x * axis.x + vertices[i].y * axis.y
+            min = Math.min(min, projection)
+            max = Math.max(max, projection)
+        }
+
+        return {
+            min: min,
+            max: max
+        }
+    }
+
+    function projectionsOverlap(a, b) {
+        return a.max >= b.min && b.max >= a.min
+    }
+
+    function captureBodyState(body) {
+        return {
+            xPosition: body.xPosition,
+            yPosition: body.yPosition,
+            facingAngle: body.facingAngle
+        }
+    }
+
+    function restoreBodyState(body, snapshot) {
+        body.xPosition = snapshot.xPosition
+        body.yPosition = snapshot.yPosition
+        body.facingAngle = snapshot.facingAngle
     }
 
     function updateWheelTrails(state) {
@@ -313,6 +484,7 @@ window.CarSimPhysics = (function() {
         processKeys: processKeys,
         clearWheelTrails: clearWheelTrails,
         resetTrailerToHitch: resetTrailerToHitch,
+        releaseTrailerFromHitch: releaseTrailerFromHitch,
         getCarCenter: getCarCenter
     }
 })()

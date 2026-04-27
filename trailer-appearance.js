@@ -3,14 +3,14 @@
 window.CarSimTrailerAppearance = (function() {
     function drawTrailer(ctx, trailer, options) {
         var wheelsOnly = options && options.wheelsOnly
-        var boxLength = trailer.width * 0.78
-        var bodyHeight = trailer.height * 0.86
-        var kingpinSection = trailer.width * 0.18
+        var boxLength = trailer.width * 0.8
+        var bodyHeight = trailer.height * 0.88
+        var kingpinSection = trailer.width * 0.16
         var wheelWidth = trailer.width * 0.08
         var wheelHeight = trailer.height * 0.18
         var wheelY = trailer.wheelTrack * 0.5
         var axleX = trailer.axleOffset
-        var frontOverhang = trailer.width * 0.1
+        var frontOverhang = trailer.width * 0.18
         var bodyStartX = -boxLength
         var bodyWidth = boxLength + frontOverhang
         var bodyFrontX = bodyStartX + bodyWidth
@@ -36,7 +36,7 @@ window.CarSimTrailerAppearance = (function() {
         ctx.fill()
 
         ctx.fillStyle = "rgb(160, 165, 170)"
-        roundRect(ctx, -kingpinSection, -trailer.height * 0.14, kingpinSection, trailer.height * 0.28, 5)
+        roundRect(ctx, -kingpinSection * 0.92, -trailer.height * 0.16, kingpinSection, trailer.height * 0.32, 5)
         ctx.fill()
 
         drawTrailerKingpin(ctx, trailer)
@@ -46,7 +46,7 @@ window.CarSimTrailerAppearance = (function() {
         ctx.fill()
 
         ctx.fillStyle = "rgb(154, 159, 164)"
-        roundRect(ctx, bodyFrontX - trailer.width * 0.06, -bodyHeight * 0.28, trailer.width * 0.06, bodyHeight * 0.56, 5)
+        roundRect(ctx, bodyFrontX - trailer.width * 0.08, -bodyHeight * 0.3, trailer.width * 0.08, bodyHeight * 0.6, 5)
         ctx.fill()
 
         ctx.fillStyle = "rgb(184, 42, 42)"
