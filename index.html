@@ -1,7 +1,9 @@
 <!doctype html>
 <html>
     <head>
-    
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Car Sim</title>
     </head>
 
     <body>
@@ -9,8 +11,22 @@
             <source src="gasgasgas.mp3" type="audio/mpeg">
         </audio>
         <style>
+            html, body {
+                margin: 0;
+                height: 100%;
+                overflow: hidden;
+                background: #111;
+            }
+
+            body {
+                font-family: Arial, sans-serif;
+            }
+
             #tela {
-                background-color: rgb(117, 85, 15) ;
+                display: block;
+                width: 100vw;
+                height: 100vh;
+                background: linear-gradient(180deg, rgb(72, 108, 38) 0%, rgb(92, 128, 54) 100%);
             }
         </style>
     <canvas id="tela" width="1280" height="680"></canvas>
