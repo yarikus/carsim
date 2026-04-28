@@ -64,6 +64,7 @@ window.CarSimPhysics = (function() {
             spawnedVehicles: [],
             trailerAttachedSpawnedVehicleIndex: null,
             enterPressedLastFrame: false,
+            trailerTogglePressedLastFrame: false,
             activeVehicleGraceFrames: 0,
             wheelTrails: {
                 frontLeft: [],
@@ -181,6 +182,7 @@ window.CarSimPhysics = (function() {
         var moveForward = isAnyKeyPressed(keyArray, ["ArrowUp", "w", "W", "KeyW"])
         var moveBackward = isAnyKeyPressed(keyArray, ["ArrowDown", "s", "S", "KeyS"])
         var enterPressed = isAnyKeyPressed(keyArray, ["Enter", "NumpadEnter"])
+        var trailerTogglePressed = isAnyKeyPressed(keyArray, ["t", "T", "KeyT"])
 
         if (moveRight && car.velocity !== 0) {
             steeringInput = 1
@@ -208,7 +210,12 @@ window.CarSimPhysics = (function() {
             trySwitchToNearbyVehicle(state)
         }
 
+        if (trailerTogglePressed && !state.trailerTogglePressedLastFrame) {
+            toggleTrailerAttachment(state)
+        }
+
         state.enterPressedLastFrame = enterPressed
+        state.trailerTogglePressedLastFrame = trailerTogglePressed
     }
 
     function isAnyKeyPressed(keyArray, keys) {
