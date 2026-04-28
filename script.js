@@ -66,9 +66,11 @@ function onDocumentClick() {
 
 function onKeyDown(evt) {
     state.keyArray[evt.key] = true
+    state.keyArray[evt.code] = true
     music.muted = false
 }
 
 function onKeyUp(evt) {
     state.keyArray[evt.key] = false
+    state.keyArray[evt.code] = false
 }

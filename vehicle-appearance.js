@@ -6,6 +6,7 @@ window.CarSimVehicleAppearance = (function() {
     function drawCar(ctx, car, wheels, options) {
         var wheelsOnly = options && options.wheelsOnly
         var showShadows = !options || options.showShadows !== false
+        var showWheels = !options || options.showWheels !== false
 
         if (debugMode) {
             ctx.strokeStyle = "rgb(255, 0, 0)"
@@ -38,12 +39,14 @@ window.CarSimVehicleAppearance = (function() {
             drawTruckShadow(ctx, car)
         }
 
-        drawRearDualWheelSet(ctx, rearAxleBack, -outerWheelY, wheelWidth, wheelHeight, dualWheelGap, wheels.rearLeft)
-        drawRearDualWheelSet(ctx, rearAxleBack, outerWheelY, wheelWidth, wheelHeight, dualWheelGap, wheels.rearRight)
-        drawRearDualWheelSet(ctx, rearAxleFront, -outerWheelY, wheelWidth, wheelHeight, dualWheelGap, wheels.rearLeft)
-        drawRearDualWheelSet(ctx, rearAxleFront, outerWheelY, wheelWidth, wheelHeight, dualWheelGap, wheels.rearRight)
-        drawWheel(ctx, steerAxleX, -outerWheelY, wheelWidth, wheelHeight, wheels.frontLeft)
-        drawWheel(ctx, steerAxleX, outerWheelY, wheelWidth, wheelHeight, wheels.frontRight)
+        if (showWheels) {
+            drawRearDualWheelSet(ctx, rearAxleBack, -outerWheelY, wheelWidth, wheelHeight, dualWheelGap, wheels.rearLeft)
+            drawRearDualWheelSet(ctx, rearAxleBack, outerWheelY, wheelWidth, wheelHeight, dualWheelGap, wheels.rearRight)
+            drawRearDualWheelSet(ctx, rearAxleFront, -outerWheelY, wheelWidth, wheelHeight, dualWheelGap, wheels.rearLeft)
+            drawRearDualWheelSet(ctx, rearAxleFront, outerWheelY, wheelWidth, wheelHeight, dualWheelGap, wheels.rearRight)
+            drawWheel(ctx, steerAxleX, -outerWheelY, wheelWidth, wheelHeight, wheels.frontLeft)
+            drawWheel(ctx, steerAxleX, outerWheelY, wheelWidth, wheelHeight, wheels.frontRight)
+        }
 
         if (wheelsOnly) {
             return

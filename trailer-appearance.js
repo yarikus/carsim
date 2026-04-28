@@ -4,6 +4,7 @@ window.CarSimTrailerAppearance = (function() {
     function drawTrailer(ctx, trailer, options) {
         var wheelsOnly = options && options.wheelsOnly
         var showShadows = !options || options.showShadows !== false
+        var showWheels = !options || options.showWheels !== false
         var boxLength = trailer.width * 0.8
         var bodyHeight = trailer.height * 0.88
         var kingpinSection = trailer.width * 0.16
@@ -25,10 +26,12 @@ window.CarSimTrailerAppearance = (function() {
             ctx.restore()
         }
 
-        drawPassiveWheel(ctx, axleX, -wheelY, wheelWidth, wheelHeight)
-        drawPassiveWheel(ctx, axleX, wheelY, wheelWidth, wheelHeight)
-        drawPassiveWheel(ctx, axleX - trailer.width * 0.1, -wheelY, wheelWidth, wheelHeight)
-        drawPassiveWheel(ctx, axleX - trailer.width * 0.1, wheelY, wheelWidth, wheelHeight)
+        if (showWheels) {
+            drawPassiveWheel(ctx, axleX, -wheelY, wheelWidth, wheelHeight)
+            drawPassiveWheel(ctx, axleX, wheelY, wheelWidth, wheelHeight)
+            drawPassiveWheel(ctx, axleX - trailer.width * 0.1, -wheelY, wheelWidth, wheelHeight)
+            drawPassiveWheel(ctx, axleX - trailer.width * 0.1, wheelY, wheelWidth, wheelHeight)
+        }
 
         if (wheelsOnly) {
             return

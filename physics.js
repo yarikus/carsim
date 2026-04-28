@@ -52,6 +52,7 @@ window.CarSimPhysics = (function() {
             debugShowHitboxes: false,
             debugDetachTrailer: false,
             graphicsShowShadows: true,
+            graphicsShowWheels: true,
             wheelTrails: {
                 frontLeft: [],
                 frontRight: [],
@@ -113,28 +114,44 @@ window.CarSimPhysics = (function() {
         var car = state.car
         var physicsConfig = state.physicsConfig
         var keyArray = state.keyArray
+        var moveRight = isAnyKeyPressed(keyArray, ["ArrowRight", "d", "D", "KeyD"])
+        var moveLeft = isAnyKeyPressed(keyArray, ["ArrowLeft", "a", "A", "KeyA"])
+        var moveForward = isAnyKeyPressed(keyArray, ["ArrowUp", "w", "W", "KeyW"])
+        var moveBackward = isAnyKeyPressed(keyArray, ["ArrowDown", "s", "S", "KeyS"])
 
-        if (keyArray["ArrowRight"] && car.velocity !== 0) {
+        if (moveRight && car.velocity !== 0) {
             steeringInput = 1
         }
 
-        if (keyArray["ArrowLeft"] && car.velocity !== 0) {
+        if (moveLeft && car.velocity !== 0) {
             steeringInput = -1
             music.muted = false
         }
 
-        if (keyArray["ArrowUp"] && car.velocity < physicsConfig.maxSpeedFront) {
+        if (moveForward && car.velocity < physicsConfig.maxSpeedFront) {
             car.forceFoward += physicsConfig.baseForce
             music.muted = false
         }
 
-        if (keyArray["ArrowDown"] && car.velocity > physicsConfig.maxSpeedBack) {
+        if (moveBackward && car.velocity > physicsConfig.maxSpeedBack) {
             car.forceBackward += physicsConfig.baseForce
             music.muted = false
         }
 
         updateSteeringAngle(car, physicsConfig, steeringInput)
         updateWheelAngles(state)
+    }
+
+    function isAnyKeyPressed(keyArray, keys) {
+        var i
+
+        for (i = 0; i < keys.length; i++) {
+            if (keyArray[keys[i]]) {
+                return true
+            }
+        }
+
+        return false
     }
 
     function updateSteeringAngle(car, physicsConfig, steeringInput) {

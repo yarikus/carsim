@@ -4,6 +4,7 @@ window.CarSimUI = (function() {
     function initializeControls(state) {
         var configControls = document.querySelectorAll("[data-config]")
         var shadowToggle = document.getElementById("showShadowsToggle")
+        var wheelToggle = document.getElementById("showWheelsToggle")
         var debugToggle = document.getElementById("modelDebugToggle")
         var wheelTrailToggle = document.getElementById("wheelTrailsToggle")
         var hitboxToggle = document.getElementById("hitboxDebugToggle")
@@ -23,6 +24,13 @@ window.CarSimUI = (function() {
             shadowToggle.checked = state.graphicsShowShadows
             shadowToggle.addEventListener("change", function(evt) {
                 state.graphicsShowShadows = evt.target.checked
+            })
+        }
+
+        if (wheelToggle) {
+            wheelToggle.checked = state.graphicsShowWheels
+            wheelToggle.addEventListener("change", function(evt) {
+                state.graphicsShowWheels = evt.target.checked
             })
         }
 
@@ -106,14 +114,16 @@ window.CarSimUI = (function() {
     function drawCar(ctx, state) {
         window.CarSimVehicleAppearance.drawCar(ctx, state.car, state.wheels, {
             wheelsOnly: state.modelDebugWheelsOnly,
-            showShadows: state.graphicsShowShadows
+            showShadows: state.graphicsShowShadows,
+            showWheels: state.graphicsShowWheels || state.modelDebugWheelsOnly
         })
     }
 
     function drawTrailer(ctx, state) {
         window.CarSimTrailerAppearance.drawTrailer(ctx, state.trailer, {
             wheelsOnly: state.modelDebugWheelsOnly,
-            showShadows: state.graphicsShowShadows
+            showShadows: state.graphicsShowShadows,
+            showWheels: state.graphicsShowWheels || state.modelDebugWheelsOnly
         })
     }
 
