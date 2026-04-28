@@ -60,7 +60,9 @@ window.CarSimPhysics = (function() {
             gameTimeSeconds: 9 * 60 * 60,
             gameTimeScale: 120,
             spawnedVehicles: [],
+            trailerAttachedSpawnedVehicleIndex: null,
             enterPressedLastFrame: false,
+            activeVehicleGraceFrames: 0,
             wheelTrails: {
                 frontLeft: [],
                 frontRight: [],
@@ -102,7 +104,7 @@ window.CarSimPhysics = (function() {
     function initializeWorld(state) {
         state.car.xPosition = -state.car.width / 2
         state.car.yPosition = -state.car.height / 2
-        resetTrailerToHitch(state)
+        attachTrailerToActiveCar(state)
     }
 
     function moveCar(state) {
@@ -133,7 +135,11 @@ window.CarSimPhysics = (function() {
 
         updateTrailer(state)
         resolveTrailerCollision(state, previousCarState, previousTrailerState)
-        resolveSpawnedVehicleCollision(state, previousCarState, previousTrailerState)
+        if (state.activeVehicleGraceFrames > 0) {
+            state.activeVehicleGraceFrames -= 1
+        } else {
+            resolveSpawnedVehicleCollision(state, previousCarState, previousTrailerState)
+        }
         updateWheelSpin(state)
         updateWheelTrails(state)
     }
@@ -312,6 +318,17 @@ window.CarSimPhysics = (function() {
         var i
 
         for (i = 0; i < state.spawnedVehicles.length; i++) {
+            if (state.trailerAttachedSpawnedVehicleIndex === i) {
+                if (bodiesColliding(carBox, getCarCollisionBox(state.spawnedVehicles[i]))) {
+                    restoreBodyState(state.car, previousCarState)
+                    restoreBodyState(state.trailer, previousTrailerState)
+                    resetCarMotion(state.car)
+                    return
+                }
+
+                continue
+            }
+
             if (
                 !bodiesColliding(carBox, getCarCollisionBox(state.spawnedVehicles[i])) &&
                 !bodiesColliding(trailerBox, getCarCollisionBox(state.spawnedVehicles[i]))
@@ -337,6 +354,7 @@ window.CarSimPhysics = (function() {
         var nearbyVehicleIndex = findNearbyVehicleIndex(state)
         var nextVehicle
         var previousVehicle
+        var previousTrailerState
 
         if (nearbyVehicleIndex === -1) {
             return false
@@ -344,6 +362,10 @@ window.CarSimPhysics = (function() {
 
         nextVehicle = state.spawnedVehicles[nearbyVehicleIndex]
         previousVehicle = state.car
+        previousTrailerState = captureBodyState(state.trailer)
+
+        resetCarMotion(previousVehicle)
+        previousVehicle.steeringAngle = 0
         state.spawnedVehicles[nearbyVehicleIndex] = previousVehicle
         state.car = nextVehicle
 
@@ -352,9 +374,14 @@ window.CarSimPhysics = (function() {
         resetWheelState(state.wheels)
 
         if (!state.debugDetachTrailer) {
-            resetTrailerToHitch(state)
+            state.debugDetachTrailer = true
+            state.trailerAttachedSpawnedVehicleIndex = nearbyVehicleIndex
+            restoreBodyState(state.trailer, previousTrailerState)
+        } else {
+            state.trailerAttachedSpawnedVehicleIndex = null
         }
 
+        state.activeVehicleGraceFrames = 12
         clearWheelTrails(state)
         return true
     }
@@ -371,9 +398,14 @@ window.CarSimPhysics = (function() {
     }
 
     function resetTrailerToHitch(state) {
+        attachTrailerToActiveCar(state)
+    }
+
+    function attachTrailerToActiveCar(state) {
         var hitchPosition = getCarHitchPosition(state.car)
         var trailer = state.trailer
 
+        state.trailerAttachedSpawnedVehicleIndex = null
         trailer.facingAngle = state.car.facingAngle
         trailer.xPosition = hitchPosition.x
         trailer.yPosition = hitchPosition.y
@@ -384,6 +416,7 @@ window.CarSimPhysics = (function() {
         var angle = trailer.facingAngle * Math.PI / 180
         var releaseDistance = Math.max(72, trailer.width * 0.22)
 
+        state.trailerAttachedSpawnedVehicleIndex = null
         trailer.xPosition -= Math.cos(angle) * releaseDistance
         trailer.yPosition -= Math.sin(angle) * releaseDistance
     }
