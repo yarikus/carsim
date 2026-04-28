@@ -111,39 +111,6 @@ window.CarSimUI = (function() {
 
     }
 
-    function initializeMusicButton(state, music, musicToggle) {
-        musicToggle.addEventListener("click", function(evt) {
-            evt.stopPropagation()
-            state.musicOn = !state.musicOn
-            updateMusicButton(state, musicToggle)
-
-            if (state.musicOn) {
-                music.muted = false
-                music.play()
-            } else {
-                music.pause()
-            }
-        })
-
-        updateMusicButton(state, musicToggle)
-    }
-
-    function updateMusicButton(state, musicToggle) {
-        musicToggle.classList.toggle("is-paused", !state.musicOn)
-        musicToggle.setAttribute("aria-label", state.musicOn ? "Pause music" : "Play music")
-        musicToggle.setAttribute("title", state.musicOn ? "Pause music" : "Play music")
-    }
-
-    function musicControl(state, music) {
-        if (!music.muted) {
-            if (state.musicOn) {
-                music.play()
-            } else {
-                music.pause()
-            }
-        }
-    }
-
     function drawHud(ctx, canvas, car) {
         ctx.save()
         ctx.fillStyle = "rgba(10, 10, 10, 0.55)"
@@ -330,8 +297,6 @@ window.CarSimUI = (function() {
         initializeControls: initializeControls,
         initializeClockPanel: initializeClockPanel,
         initializeTelemetryPanel: initializeTelemetryPanel,
-        initializeMusicButton: initializeMusicButton,
-        musicControl: musicControl,
         updateClockPanel: updateClockPanel,
         updateTelemetryPanel: updateTelemetryPanel,
         updateTrailerAttachButton: updateTrailerAttachButton,

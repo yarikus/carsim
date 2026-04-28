@@ -27,37 +27,78 @@
                 min-width: 0;
             }
 
-            #musicToggle {
+            .music-player {
                 position: fixed;
                 top: 20px;
                 right: 332px;
-                width: 58px;
-                height: 58px;
+                width: 288px;
+                padding: 14px 16px 16px;
+                border: 1px solid rgba(255, 255, 255, 0.18);
+                border-radius: 20px;
+                background: linear-gradient(180deg, rgba(15, 18, 21, 0.72) 0%, rgba(8, 10, 12, 0.58) 100%);
+                backdrop-filter: blur(12px);
+                -webkit-backdrop-filter: blur(12px);
+                box-sizing: border-box;
+                z-index: 2;
+            }
+
+            .music-player-header {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 12px;
+                margin-bottom: 10px;
+            }
+
+            .music-player-meta {
+                min-width: 0;
+                flex: 1;
+            }
+
+            .music-player-label {
+                display: block;
+                margin-bottom: 3px;
+                font-size: 11px;
+                letter-spacing: 0.1em;
+                text-transform: uppercase;
+                color: rgba(255, 255, 255, 0.54);
+            }
+
+            .music-player-title {
+                display: block;
+                overflow: hidden;
+                white-space: nowrap;
+                text-overflow: ellipsis;
+                font-size: 18px;
+                font-weight: 700;
+                color: rgba(255, 255, 255, 0.96);
+            }
+
+            .music-toggle {
+                width: 52px;
+                height: 52px;
                 display: flex;
                 align-items: center;
                 justify-content: center;
                 padding: 0;
-                border: 1px solid rgba(255, 255, 255, 0.18);
+                border: 1px solid rgba(255, 255, 255, 0.16);
                 border-radius: 16px;
-                background: rgba(12, 12, 12, 0.28);
-                backdrop-filter: blur(8px);
-                -webkit-backdrop-filter: blur(8px);
+                background: rgba(255, 255, 255, 0.06);
                 cursor: pointer;
-                z-index: 2;
-                transition: background 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+                transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
             }
 
-            #musicToggle:hover {
-                background: rgba(12, 12, 12, 0.42);
-                border-color: rgba(255, 255, 255, 0.28);
+            .music-toggle:hover {
+                background: rgba(255, 255, 255, 0.1);
+                border-color: rgba(255, 255, 255, 0.26);
                 transform: translateY(-1px);
             }
 
-            #musicToggle:active {
+            .music-toggle:active {
                 transform: translateY(0);
             }
 
-            #musicToggle:focus-visible {
+            .music-toggle:focus-visible {
                 outline: 2px solid rgba(255, 255, 255, 0.45);
                 outline-offset: 3px;
             }
@@ -66,31 +107,122 @@
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                gap: 6px;
-                width: 22px;
-                height: 22px;
+                gap: 5px;
+                width: 20px;
+                height: 20px;
             }
 
             .pause-icon span {
                 width: 6px;
-                height: 22px;
+                height: 20px;
                 border-radius: 999px;
                 background: rgba(255, 255, 255, 0.92);
                 display: block;
             }
 
-            #musicToggle.is-paused .pause-icon {
+            .music-toggle.is-paused .pause-icon {
                 width: 0;
                 height: 0;
                 gap: 0;
-                border-top: 12px solid transparent;
-                border-bottom: 12px solid transparent;
-                border-left: 18px solid rgba(255, 255, 255, 0.92);
+                border-top: 11px solid transparent;
+                border-bottom: 11px solid transparent;
+                border-left: 17px solid rgba(255, 255, 255, 0.92);
                 transform: translateX(2px);
             }
 
-            #musicToggle.is-paused .pause-icon span {
+            .music-toggle.is-paused .pause-icon span {
                 display: none;
+            }
+
+            .music-progress {
+                display: block;
+                width: 100%;
+                margin: 0 0 8px;
+                appearance: none;
+                height: 6px;
+                border-radius: 999px;
+                background: linear-gradient(90deg, rgba(242, 242, 242, 0.92) 0%, rgba(242, 242, 242, 0.92) var(--music-progress, 0%), rgba(255, 255, 255, 0.14) var(--music-progress, 0%), rgba(255, 255, 255, 0.14) 100%);
+                outline: none;
+                cursor: pointer;
+            }
+
+            .music-progress::-webkit-slider-thumb {
+                appearance: none;
+                width: 14px;
+                height: 14px;
+                border-radius: 50%;
+                border: none;
+                background: rgb(255, 255, 255);
+                box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.08);
+            }
+
+            .music-progress::-moz-range-thumb {
+                width: 14px;
+                height: 14px;
+                border-radius: 50%;
+                border: none;
+                background: rgb(255, 255, 255);
+                box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.08);
+            }
+
+            .music-player-times {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 12px;
+                font-size: 12px;
+                color: rgba(255, 255, 255, 0.68);
+                font-variant-numeric: tabular-nums;
+            }
+
+            .music-volume {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                margin-top: 10px;
+            }
+
+            .music-volume-label {
+                min-width: 52px;
+                font-size: 11px;
+                letter-spacing: 0.08em;
+                text-transform: uppercase;
+                color: rgba(255, 255, 255, 0.56);
+            }
+
+            .music-volume-slider {
+                flex: 1;
+                appearance: none;
+                height: 5px;
+                border-radius: 999px;
+                background: linear-gradient(90deg, rgba(242, 242, 242, 0.9) 0%, rgba(242, 242, 242, 0.9) var(--music-volume, 65%), rgba(255, 255, 255, 0.12) var(--music-volume, 65%), rgba(255, 255, 255, 0.12) 100%);
+                outline: none;
+                cursor: pointer;
+            }
+
+            .music-volume-slider::-webkit-slider-thumb {
+                appearance: none;
+                width: 13px;
+                height: 13px;
+                border-radius: 50%;
+                border: none;
+                background: rgb(255, 255, 255);
+            }
+
+            .music-volume-slider::-moz-range-thumb {
+                width: 13px;
+                height: 13px;
+                border-radius: 50%;
+                border: none;
+                background: rgb(255, 255, 255);
+            }
+
+            .music-volume-value {
+                min-width: 34px;
+                text-align: right;
+                font-size: 12px;
+                color: rgba(255, 255, 255, 0.72);
+                font-variant-numeric: tabular-nums;
             }
 
             #tela {
@@ -351,12 +483,30 @@
             <source src="gasgasgas.mp3" type="audio/mpeg">
         </audio>
         <div class="sim-shell">
-            <button id="musicToggle" type="button" aria-label="Pause music" title="Pause music">
-                <span class="pause-icon" aria-hidden="true">
-                    <span></span>
-                    <span></span>
-                </span>
-            </button>
+            <section class="music-player" id="musicPlayer" aria-label="Music player">
+                <div class="music-player-header">
+                    <div class="music-player-meta">
+                        <span class="music-player-label">Now Playing</span>
+                        <span class="music-player-title" id="musicTitle">Gas Gas Gas</span>
+                    </div>
+                    <button class="music-toggle" id="musicToggle" type="button" aria-label="Pause music" title="Pause music">
+                        <span class="pause-icon" aria-hidden="true">
+                            <span></span>
+                            <span></span>
+                        </span>
+                    </button>
+                </div>
+                <input class="music-progress" id="musicSeek" type="range" min="0" max="100" value="0" step="0.1" aria-label="Seek track">
+                <div class="music-player-times">
+                    <span id="musicCurrentTime">00:00</span>
+                    <span id="musicDuration">00:00</span>
+                </div>
+                <div class="music-volume">
+                    <span class="music-volume-label">Volume</span>
+                    <input class="music-volume-slider" id="musicVolume" type="range" min="0" max="100" value="65" step="1" aria-label="Music volume">
+                    <span class="music-volume-value" id="musicVolumeValue">65%</span>
+                </div>
+            </section>
             <section class="clock-panel" id="clockPanel" aria-label="Game time">
                 <div class="clock-main">
                     <span class="clock-label">Game Time</span>
@@ -505,6 +655,7 @@
         <script src="vehicle-appearance.js"></script>
         <script src="trailer-appearance.js"></script>
         <script src="ui.js"></script>
+        <script src="music-player.js"></script>
         <script src="script.js"></script>
     </body>
 </html>

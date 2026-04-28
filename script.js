@@ -2,7 +2,6 @@
 
 var music = document.getElementById("music")
 var canvas = document.getElementById("tela")
-var musicToggle = document.getElementById("musicToggle")
 var ctx = canvas.getContext("2d")
 var lastFrameTime = null
 
@@ -19,7 +18,7 @@ window.CarSimEnvironment.resizeCanvas(canvas)
 window.CarSimUI.initializeControls(state)
 window.CarSimUI.initializeClockPanel()
 window.CarSimUI.initializeTelemetryPanel()
-window.CarSimUI.initializeMusicButton(state, music, musicToggle)
+window.CarSimMusicPlayer.initialize(state, music)
 
 requestAnimationFrame(draw)
 
@@ -38,7 +37,7 @@ function draw(timestamp) {
 
     lastFrameTime = timestamp
 
-    window.CarSimUI.musicControl(state, music)
+    window.CarSimMusicPlayer.musicControl(state, music)
     window.CarSimPhysics.processKeys(state, music)
     window.CarSimPhysics.moveCar(state)
     window.CarSimPhysics.updateGameTime(state, deltaSeconds)
