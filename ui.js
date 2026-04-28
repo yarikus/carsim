@@ -19,6 +19,7 @@ window.CarSimUI = (function() {
         var wheelTrailToggle = document.getElementById("wheelTrailsToggle")
         var hitboxToggle = document.getElementById("hitboxDebugToggle")
         var telemetryToggle = document.getElementById("telemetryDebugToggle")
+        var radiusToggle = document.getElementById("vehicleRadiusDebugToggle")
         var spawnVehicleButton = document.getElementById("spawnVehicleButton")
         var i
 
@@ -75,6 +76,13 @@ window.CarSimUI = (function() {
             telemetryToggle.addEventListener("change", function(evt) {
                 state.debugShowTelemetry = evt.target.checked
                 syncTelemetryVisibility(state)
+            })
+        }
+
+        if (radiusToggle) {
+            radiusToggle.checked = state.debugShowVehicleRadius
+            radiusToggle.addEventListener("change", function(evt) {
+                state.debugShowVehicleRadius = evt.target.checked
             })
         }
 
@@ -185,7 +193,8 @@ window.CarSimUI = (function() {
             { label: "Friction", value: formatTelemetryNumber(state.physicsConfig.surfaceFriction) },
             { label: "Max forward", value: formatTelemetryNumber(state.physicsConfig.maxSpeedFront) },
             { label: "Max reverse", value: formatTelemetryNumber(state.physicsConfig.maxSpeedBack) },
-            { label: "Trailer", value: state.debugDetachTrailer ? "Detached" : "Hitched" }
+            { label: "Trailer", value: state.debugDetachTrailer ? "Detached" : "Hitched" },
+            { label: "Nearby swap", value: state.debugShowVehicleRadius ? "Enter to switch" : "Hidden" }
         ]
 
         telemetryGrid.innerHTML = rows.map(function(row) {

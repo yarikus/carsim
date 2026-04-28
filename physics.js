@@ -4,6 +4,7 @@ window.CarSimPhysics = (function() {
     var steeringReturnSpeed = 2.2
     var steeringResponse = 0.22
     var maxArticulationAngle = 78
+    var vehicleSwapRadius = 230
 
     function createState() {
         return {
@@ -21,7 +22,8 @@ window.CarSimPhysics = (function() {
                 wheelBase: 96,
                 frontTrack: 44,
                 rearTrack: 44,
-                hitchOffset: -36
+                hitchOffset: -36,
+                accentColor: "rgb(170, 28, 28)"
             },
             trailer: {
                 width: 352,
@@ -52,11 +54,13 @@ window.CarSimPhysics = (function() {
             debugShowHitboxes: false,
             debugDetachTrailer: false,
             debugShowTelemetry: true,
+            debugShowVehicleRadius: false,
             graphicsShowShadows: true,
             graphicsShowWheels: true,
             gameTimeSeconds: 9 * 60 * 60,
             gameTimeScale: 120,
             spawnedVehicles: [],
+            enterPressedLastFrame: false,
             wheelTrails: {
                 frontLeft: [],
                 frontRight: [],
@@ -81,7 +85,15 @@ window.CarSimPhysics = (function() {
             height: 58,
             xPosition: xPosition,
             yPosition: yPosition,
+            velocity: 0,
+            displayVelocity: 0,
+            forceFoward: 0,
+            forceBackward: 0,
             facingAngle: facingAngle,
+            steeringAngle: 0,
+            wheelBase: 96,
+            frontTrack: 44,
+            rearTrack: 44,
             hitchOffset: -36,
             accentColor: accentColor
         }
@@ -160,6 +172,7 @@ window.CarSimPhysics = (function() {
         var moveLeft = isAnyKeyPressed(keyArray, ["ArrowLeft", "a", "A", "KeyA"])
         var moveForward = isAnyKeyPressed(keyArray, ["ArrowUp", "w", "W", "KeyW"])
         var moveBackward = isAnyKeyPressed(keyArray, ["ArrowDown", "s", "S", "KeyS"])
+        var enterPressed = isAnyKeyPressed(keyArray, ["Enter", "NumpadEnter"])
 
         if (moveRight && car.velocity !== 0) {
             steeringInput = 1
@@ -182,6 +195,12 @@ window.CarSimPhysics = (function() {
 
         updateSteeringAngle(car, physicsConfig, steeringInput)
         updateWheelAngles(state)
+
+        if (enterPressed && !state.enterPressedLastFrame) {
+            trySwitchToNearbyVehicle(state)
+        }
+
+        state.enterPressedLastFrame = enterPressed
     }
 
     function isAnyKeyPressed(keyArray, keys) {
@@ -312,6 +331,43 @@ window.CarSimPhysics = (function() {
         car.forceFoward = 0
         car.forceBackward = 0
         car.displayVelocity = 0
+    }
+
+    function trySwitchToNearbyVehicle(state) {
+        var nearbyVehicleIndex = findNearbyVehicleIndex(state)
+        var nextVehicle
+        var previousVehicle
+
+        if (nearbyVehicleIndex === -1) {
+            return false
+        }
+
+        nextVehicle = state.spawnedVehicles[nearbyVehicleIndex]
+        previousVehicle = state.car
+        state.spawnedVehicles[nearbyVehicleIndex] = previousVehicle
+        state.car = nextVehicle
+
+        resetCarMotion(state.car)
+        state.car.steeringAngle = 0
+        resetWheelState(state.wheels)
+
+        if (!state.debugDetachTrailer) {
+            resetTrailerToHitch(state)
+        }
+
+        clearWheelTrails(state)
+        return true
+    }
+
+    function resetWheelState(wheels) {
+        wheels.frontLeft.steeringAngle = 0
+        wheels.frontRight.steeringAngle = 0
+        wheels.rearLeft.steeringAngle = 0
+        wheels.rearRight.steeringAngle = 0
+        wheels.frontLeft.spinAngle = 0
+        wheels.frontRight.spinAngle = 0
+        wheels.rearLeft.spinAngle = 0
+        wheels.rearRight.spinAngle = 0
     }
 
     function resetTrailerToHitch(state) {
@@ -452,6 +508,29 @@ window.CarSimPhysics = (function() {
         }
 
         return true
+    }
+
+    function findNearbyVehicleIndex(state) {
+        var activeCenter = getCarCenter(state.car)
+        var closestDistance = vehicleSwapRadius
+        var closestIndex = -1
+        var i
+        var otherCenter
+        var distance
+
+        for (i = 0; i < state.spawnedVehicles.length; i++) {
+            otherCenter = getCarCenter(state.spawnedVehicles[i])
+            distance = Math.hypot(otherCenter.x - activeCenter.x, otherCenter.y - activeCenter.y)
+
+            if (distance > closestDistance) {
+                continue
+            }
+
+            closestDistance = distance
+            closestIndex = i
+        }
+
+        return closestIndex
     }
 
     function getTrailerCollisionBox(trailer) {
@@ -647,6 +726,23 @@ window.CarSimPhysics = (function() {
         return hitboxes
     }
 
+    function getVehicleRadiusDebug(state) {
+        var activeCenter = getCarCenter(state.car)
+        var nearbyVehicleIndex = findNearbyVehicleIndex(state)
+        var targetCenter = null
+
+        if (nearbyVehicleIndex !== -1) {
+            targetCenter = getCarCenter(state.spawnedVehicles[nearbyVehicleIndex])
+        }
+
+        return {
+            centerX: activeCenter.x,
+            centerY: activeCenter.y,
+            radius: vehicleSwapRadius,
+            targetCenter: targetCenter
+        }
+    }
+
     function appendSpawnedVehicleHitboxes(state, hitboxes) {
         var i
 
@@ -670,6 +766,7 @@ window.CarSimPhysics = (function() {
         spawnRandomVehicle: spawnRandomVehicle,
         clearWheelTrails: clearWheelTrails,
         getDebugHitboxes: getDebugHitboxes,
+        getVehicleRadiusDebug: getVehicleRadiusDebug,
         resetTrailerToHitch: resetTrailerToHitch,
         releaseTrailerFromHitch: releaseTrailerFromHitch,
         getCarCenter: getCarCenter

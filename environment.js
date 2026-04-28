@@ -16,6 +16,7 @@ window.CarSimEnvironment = (function() {
         drawSurface(ctx, canvas, cameraX, cameraY)
         drawWheelTrails(ctx, state)
         drawDebugHitboxes(ctx, state)
+        drawVehicleRadiusDebug(ctx, state)
         ctx.restore()
     }
 
@@ -111,6 +112,48 @@ window.CarSimEnvironment = (function() {
         for (i = 0; i < hitboxes.length; i++) {
             drawOrientedHitbox(ctx, hitboxes[i])
         }
+    }
+
+    function drawVehicleRadiusDebug(ctx, state) {
+        var radiusDebug
+
+        if (!state.debugShowVehicleRadius) {
+            return
+        }
+
+        radiusDebug = window.CarSimPhysics.getVehicleRadiusDebug(state)
+
+        ctx.save()
+        ctx.strokeStyle = "rgba(120, 220, 255, 0.9)"
+        ctx.fillStyle = "rgba(120, 220, 255, 0.08)"
+        ctx.lineWidth = 2
+        ctx.setLineDash([12, 8])
+        ctx.beginPath()
+        ctx.arc(radiusDebug.centerX, radiusDebug.centerY, radiusDebug.radius, 0, Math.PI * 2)
+        ctx.fill()
+        ctx.stroke()
+        ctx.setLineDash([])
+
+        ctx.fillStyle = "rgba(120, 220, 255, 0.95)"
+        ctx.beginPath()
+        ctx.arc(radiusDebug.centerX, radiusDebug.centerY, 4, 0, Math.PI * 2)
+        ctx.fill()
+
+        if (radiusDebug.targetCenter) {
+            ctx.strokeStyle = "rgba(164, 255, 110, 0.95)"
+            ctx.lineWidth = 3
+            ctx.beginPath()
+            ctx.moveTo(radiusDebug.centerX, radiusDebug.centerY)
+            ctx.lineTo(radiusDebug.targetCenter.x, radiusDebug.targetCenter.y)
+            ctx.stroke()
+
+            ctx.fillStyle = "rgba(164, 255, 110, 0.95)"
+            ctx.beginPath()
+            ctx.arc(radiusDebug.targetCenter.x, radiusDebug.targetCenter.y, 5, 0, Math.PI * 2)
+            ctx.fill()
+        }
+
+        ctx.restore()
     }
 
     function drawOrientedHitbox(ctx, hitboxEntry) {
