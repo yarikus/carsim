@@ -324,6 +324,28 @@
                 accent-color: rgb(236, 236, 236);
                 cursor: pointer;
             }
+
+            .debug-button {
+                width: 100%;
+                padding: 12px 14px;
+                border: 1px solid rgba(255, 255, 255, 0.14);
+                border-radius: 12px;
+                background: rgba(255, 255, 255, 0.06);
+                color: rgba(255, 255, 255, 0.92);
+                font-size: 14px;
+                cursor: pointer;
+                transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+            }
+
+            .debug-button:hover {
+                background: rgba(255, 255, 255, 0.1);
+                border-color: rgba(255, 255, 255, 0.24);
+                transform: translateY(-1px);
+            }
+
+            .debug-button:active {
+                transform: translateY(0);
+            }
         </style>
         <audio muted id="music">
             <source src="gasgasgas.mp3" type="audio/mpeg">
@@ -460,6 +482,10 @@
                         <input id="detachTrailerToggle" type="checkbox">
                         <span>Detach trailer</span>
                     </label>
+                </div>
+
+                <div class="control-group">
+                    <button class="debug-button" id="spawnVehicleButton" type="button">Spawn vehicle</button>
                 </div>
             </section>
         </aside>

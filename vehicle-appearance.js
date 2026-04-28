@@ -7,6 +7,7 @@ window.CarSimVehicleAppearance = (function() {
         var wheelsOnly = options && options.wheelsOnly
         var showShadows = !options || options.showShadows !== false
         var showWheels = !options || options.showWheels !== false
+        var accentColor = options && options.accentColor ? options.accentColor : "rgb(170, 28, 28)"
 
         if (debugMode) {
             ctx.strokeStyle = "rgb(255, 0, 0)"
@@ -56,7 +57,7 @@ window.CarSimVehicleAppearance = (function() {
         roundRect(ctx, -car.width * 0.34, -car.height * 0.12, frameLength, car.height * 0.24, 6)
         ctx.fill()
 
-        ctx.fillStyle = "rgb(170, 28, 28)"
+        ctx.fillStyle = accentColor
         roundRect(ctx, sleeperStart, -sleeperHeight / 2, sleeperLength, sleeperHeight, 11)
         ctx.fill()
         roundRect(ctx, cabStart, -bodyHeight / 2, cabLength, bodyHeight, 11)
@@ -104,7 +105,7 @@ window.CarSimVehicleAppearance = (function() {
         roundRect(ctx, hoodStart + hoodLength * 0.85, hoodHeight * 0.23, car.width * 0.04, car.height * 0.12, 4)
         ctx.fill()
 
-        ctx.fillStyle = "rgb(184, 42, 42)"
+        ctx.fillStyle = accentColor
         roundRect(ctx, -car.width * 0.38, -car.height * 0.22, car.width * 0.04, car.height * 0.12, 4)
         ctx.fill()
         roundRect(ctx, -car.width * 0.38, car.height * 0.1, car.width * 0.04, car.height * 0.12, 4)

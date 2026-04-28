@@ -27,7 +27,10 @@ function draw(timestamp) {
     var carCenter
     var trailerOffsetX
     var trailerOffsetY
+    var spawnedVehicleOffsetX
+    var spawnedVehicleOffsetY
     var deltaSeconds = 0
+    var i
 
     if (lastFrameTime !== null) {
         deltaSeconds = (timestamp - lastFrameTime) / 1000
@@ -43,13 +46,25 @@ function draw(timestamp) {
     ctx.clearRect(0, 0, canvas.width, canvas.height)
     window.CarSimEnvironment.drawEnvironment(ctx, canvas, state)
 
+    carCenter = window.CarSimPhysics.getCarCenter(state.car)
+
+    for (i = 0; i < state.spawnedVehicles.length; i++) {
+        spawnedVehicleOffsetX = state.spawnedVehicles[i].xPosition + state.spawnedVehicles[i].width / 2 - carCenter.x
+        spawnedVehicleOffsetY = state.spawnedVehicles[i].yPosition + state.spawnedVehicles[i].height / 2 - carCenter.y
+
+        ctx.save()
+        ctx.translate(canvas.width / 2 + spawnedVehicleOffsetX, canvas.height / 2 + spawnedVehicleOffsetY)
+        ctx.rotate(state.spawnedVehicles[i].facingAngle * Math.PI / 180)
+        window.CarSimUI.drawSpawnedVehicle(ctx, state.spawnedVehicles[i], state)
+        ctx.restore()
+    }
+
     ctx.save()
     ctx.translate(canvas.width / 2, canvas.height / 2)
     ctx.rotate(state.car.facingAngle * Math.PI / 180)
     window.CarSimUI.drawCar(ctx, state)
     ctx.restore()
 
-    carCenter = window.CarSimPhysics.getCarCenter(state.car)
     trailerOffsetX = state.trailer.xPosition - carCenter.x
     trailerOffsetY = state.trailer.yPosition - carCenter.y
 

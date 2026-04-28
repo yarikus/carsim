@@ -56,6 +56,7 @@ window.CarSimPhysics = (function() {
             graphicsShowWheels: true,
             gameTimeSeconds: 9 * 60 * 60,
             gameTimeScale: 120,
+            spawnedVehicles: [],
             wheelTrails: {
                 frontLeft: [],
                 frontRight: [],
@@ -71,6 +72,18 @@ window.CarSimPhysics = (function() {
         return {
             steeringAngle: 0,
             spinAngle: 0
+        }
+    }
+
+    function createSpawnedVehicleState(xPosition, yPosition, facingAngle, accentColor) {
+        return {
+            width: 156,
+            height: 58,
+            xPosition: xPosition,
+            yPosition: yPosition,
+            facingAngle: facingAngle,
+            hitchOffset: -36,
+            accentColor: accentColor
         }
     }
 
@@ -351,6 +364,71 @@ window.CarSimPhysics = (function() {
         }
     }
 
+    function spawnRandomVehicle(state) {
+        var playerCenter = getCarCenter(state.car)
+        var attemptCount = 32
+        var attempt
+        var radius
+        var angle
+        var facingAngle
+        var centerX
+        var centerY
+        var vehicle
+        var accentColor
+
+        for (attempt = 0; attempt < attemptCount; attempt++) {
+            radius = 420 + Math.random() * 980
+            angle = Math.random() * Math.PI * 2
+            facingAngle = Math.random() * 360
+            centerX = playerCenter.x + Math.cos(angle) * radius
+            centerY = playerCenter.y + Math.sin(angle) * radius
+            accentColor = getRandomAccentColor()
+            vehicle = createSpawnedVehicleState(centerX - 156 / 2, centerY - 58 / 2, facingAngle, accentColor)
+
+            if (isVehicleSpawnFree(state, vehicle)) {
+                state.spawnedVehicles.push(vehicle)
+                return true
+            }
+        }
+
+        return false
+    }
+
+    function getRandomAccentColor() {
+        var palette = [
+            "rgb(178, 32, 32)",
+            "rgb(26, 92, 168)",
+            "rgb(208, 118, 24)",
+            "rgb(46, 122, 76)",
+            "rgb(132, 44, 148)",
+            "rgb(176, 176, 176)",
+            "rgb(196, 172, 42)"
+        ]
+
+        return palette[Math.floor(Math.random() * palette.length)]
+    }
+
+    function isVehicleSpawnFree(state, vehicle) {
+        var candidateBox = getCarCollisionBox(vehicle)
+        var i
+
+        if (bodiesColliding(candidateBox, getCarCollisionBox(state.car))) {
+            return false
+        }
+
+        if (bodiesColliding(candidateBox, getTrailerCollisionBox(state.trailer))) {
+            return false
+        }
+
+        for (i = 0; i < state.spawnedVehicles.length; i++) {
+            if (bodiesColliding(candidateBox, getCarCollisionBox(state.spawnedVehicles[i]))) {
+                return false
+            }
+        }
+
+        return true
+    }
+
     function getTrailerCollisionBox(trailer) {
         var bodyLength = trailer.width * 0.84
         var localCenterX = -bodyLength * 0.5 + trailer.width * 0.12
@@ -548,6 +626,7 @@ window.CarSimPhysics = (function() {
         updateGameTime: updateGameTime,
         getTimeOfDay: getTimeOfDay,
         processKeys: processKeys,
+        spawnRandomVehicle: spawnRandomVehicle,
         clearWheelTrails: clearWheelTrails,
         getDebugHitboxes: getDebugHitboxes,
         resetTrailerToHitch: resetTrailerToHitch,

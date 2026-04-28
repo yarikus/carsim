@@ -4,6 +4,12 @@ window.CarSimUI = (function() {
     var telemetryGrid = null
     var clockValue = null
     var timeOfDayValue = null
+    var parkedVehicleWheels = {
+        frontLeft: { steeringAngle: 0, spinAngle: 0 },
+        frontRight: { steeringAngle: 0, spinAngle: 0 },
+        rearLeft: { steeringAngle: 0, spinAngle: 0 },
+        rearRight: { steeringAngle: 0, spinAngle: 0 }
+    }
 
     function initializeControls(state) {
         var configControls = document.querySelectorAll("[data-config]")
@@ -13,6 +19,7 @@ window.CarSimUI = (function() {
         var wheelTrailToggle = document.getElementById("wheelTrailsToggle")
         var hitboxToggle = document.getElementById("hitboxDebugToggle")
         var telemetryToggle = document.getElementById("telemetryDebugToggle")
+        var spawnVehicleButton = document.getElementById("spawnVehicleButton")
         var i
 
         for (i = 0; i < configControls.length; i++) {
@@ -68,6 +75,12 @@ window.CarSimUI = (function() {
             telemetryToggle.addEventListener("change", function(evt) {
                 state.debugShowTelemetry = evt.target.checked
                 syncTelemetryVisibility(state)
+            })
+        }
+
+        if (spawnVehicleButton) {
+            spawnVehicleButton.addEventListener("click", function() {
+                window.CarSimPhysics.spawnRandomVehicle(state)
             })
         }
 
@@ -184,7 +197,8 @@ window.CarSimUI = (function() {
         window.CarSimVehicleAppearance.drawCar(ctx, state.car, state.wheels, {
             wheelsOnly: state.modelDebugWheelsOnly,
             showShadows: state.graphicsShowShadows,
-            showWheels: state.graphicsShowWheels || state.modelDebugWheelsOnly
+            showWheels: state.graphicsShowWheels || state.modelDebugWheelsOnly,
+            accentColor: state.car.accentColor
         })
     }
 
@@ -193,6 +207,15 @@ window.CarSimUI = (function() {
             wheelsOnly: state.modelDebugWheelsOnly,
             showShadows: state.graphicsShowShadows,
             showWheels: state.graphicsShowWheels || state.modelDebugWheelsOnly
+        })
+    }
+
+    function drawSpawnedVehicle(ctx, vehicle, state) {
+        window.CarSimVehicleAppearance.drawCar(ctx, vehicle, parkedVehicleWheels, {
+            wheelsOnly: state.modelDebugWheelsOnly,
+            showShadows: state.graphicsShowShadows,
+            showWheels: state.graphicsShowWheels || state.modelDebugWheelsOnly,
+            accentColor: vehicle.accentColor
         })
     }
 
@@ -284,6 +307,7 @@ window.CarSimUI = (function() {
         updateTelemetryPanel: updateTelemetryPanel,
         drawHud: drawHud,
         drawCar: drawCar,
-        drawTrailer: drawTrailer
+        drawTrailer: drawTrailer,
+        drawSpawnedVehicle: drawSpawnedVehicle
     }
 })()
