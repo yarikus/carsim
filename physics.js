@@ -355,6 +355,7 @@ window.CarSimPhysics = (function() {
         var nextVehicle
         var previousVehicle
         var previousTrailerState
+        var switchingIntoTrailerOwner
 
         if (nearbyVehicleIndex === -1) {
             return false
@@ -363,6 +364,7 @@ window.CarSimPhysics = (function() {
         nextVehicle = state.spawnedVehicles[nearbyVehicleIndex]
         previousVehicle = state.car
         previousTrailerState = captureBodyState(state.trailer)
+        switchingIntoTrailerOwner = state.trailerAttachedSpawnedVehicleIndex === nearbyVehicleIndex
 
         resetCarMotion(previousVehicle)
         previousVehicle.steeringAngle = 0
@@ -373,7 +375,11 @@ window.CarSimPhysics = (function() {
         state.car.steeringAngle = 0
         resetWheelState(state.wheels)
 
-        if (!state.debugDetachTrailer) {
+        if (switchingIntoTrailerOwner) {
+            state.debugDetachTrailer = false
+            state.trailerAttachedSpawnedVehicleIndex = null
+            attachTrailerToActiveCar(state)
+        } else if (!state.debugDetachTrailer) {
             state.debugDetachTrailer = true
             state.trailerAttachedSpawnedVehicleIndex = nearbyVehicleIndex
             restoreBodyState(state.trailer, previousTrailerState)
