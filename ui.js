@@ -10,6 +10,7 @@ window.CarSimUI = (function() {
         var debugToggle = document.getElementById("modelDebugToggle")
         var wheelTrailToggle = document.getElementById("wheelTrailsToggle")
         var hitboxToggle = document.getElementById("hitboxDebugToggle")
+        var telemetryToggle = document.getElementById("telemetryDebugToggle")
         var i
 
         for (i = 0; i < configControls.length; i++) {
@@ -57,6 +58,14 @@ window.CarSimUI = (function() {
             hitboxToggle.checked = state.debugShowHitboxes
             hitboxToggle.addEventListener("change", function(evt) {
                 state.debugShowHitboxes = evt.target.checked
+            })
+        }
+
+        if (telemetryToggle) {
+            telemetryToggle.checked = state.debugShowTelemetry
+            telemetryToggle.addEventListener("change", function(evt) {
+                state.debugShowTelemetry = evt.target.checked
+                syncTelemetryVisibility(state)
             })
         }
 
@@ -115,12 +124,13 @@ window.CarSimUI = (function() {
 
     function initializeTelemetryPanel() {
         telemetryGrid = document.getElementById("telemetryGrid")
+        syncTelemetryVisibility({ debugShowTelemetry: true })
     }
 
     function updateTelemetryPanel(state) {
         var rows
 
-        if (!telemetryGrid) {
+        if (!telemetryGrid || !state.debugShowTelemetry) {
             return
         }
 
@@ -222,6 +232,16 @@ window.CarSimUI = (function() {
         }
 
         return numericValue.toFixed(3).replace(/0+$/, "").replace(/\.$/, "")
+    }
+
+    function syncTelemetryVisibility(state) {
+        var telemetryPanel = document.getElementById("telemetryPanel")
+
+        if (!telemetryPanel) {
+            return
+        }
+
+        telemetryPanel.style.display = state.debugShowTelemetry ? "block" : "none"
     }
 
     return {
