@@ -289,10 +289,14 @@ window.CarSimPhysics = (function() {
 
     function resolveSpawnedVehicleCollision(state, previousCarState, previousTrailerState) {
         var carBox = getCarCollisionBox(state.car)
+        var trailerBox = getTrailerCollisionBox(state.trailer)
         var i
 
         for (i = 0; i < state.spawnedVehicles.length; i++) {
-            if (!bodiesColliding(carBox, getCarCollisionBox(state.spawnedVehicles[i]))) {
+            if (
+                !bodiesColliding(carBox, getCarCollisionBox(state.spawnedVehicles[i])) &&
+                !bodiesColliding(trailerBox, getCarCollisionBox(state.spawnedVehicles[i]))
+            ) {
                 continue
             }
 
