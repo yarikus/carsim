@@ -100,6 +100,50 @@
                 background: linear-gradient(180deg, rgb(72, 108, 38) 0%, rgb(92, 128, 54) 100%);
             }
 
+            .telemetry-panel {
+                position: fixed;
+                right: 332px;
+                bottom: 20px;
+                width: 240px;
+                box-sizing: border-box;
+                padding: 14px 16px;
+                border: 1px solid rgba(255, 255, 255, 0.14);
+                border-radius: 16px;
+                background: rgba(10, 12, 14, 0.42);
+                backdrop-filter: blur(10px);
+                -webkit-backdrop-filter: blur(10px);
+                color: rgba(255, 255, 255, 0.92);
+                z-index: 2;
+                pointer-events: none;
+            }
+
+            .telemetry-panel h3 {
+                margin: 0 0 10px;
+                font-size: 13px;
+                font-weight: 700;
+                letter-spacing: 0.08em;
+                text-transform: uppercase;
+                color: rgba(255, 255, 255, 0.7);
+            }
+
+            .telemetry-grid {
+                display: grid;
+                grid-template-columns: minmax(0, 1fr) auto;
+                gap: 7px 14px;
+                font-size: 13px;
+                line-height: 1.35;
+            }
+
+            .telemetry-label {
+                color: rgba(255, 255, 255, 0.62);
+            }
+
+            .telemetry-value {
+                text-align: right;
+                color: rgba(255, 255, 255, 0.96);
+                font-variant-numeric: tabular-nums;
+            }
+
             .sidebar {
                 width: 312px;
                 flex: 0 0 312px;
@@ -222,6 +266,10 @@
                 </span>
             </button>
             <canvas id="tela" width="1280" height="680"></canvas>
+            <section class="telemetry-panel" id="telemetryPanel" aria-label="Vehicle telemetry">
+                <h3>Vehicle Telemetry</h3>
+                <div class="telemetry-grid" id="telemetryGrid"></div>
+            </section>
         </div>
         <aside class="sidebar">
             <h2>Vehicle Physics</h2>

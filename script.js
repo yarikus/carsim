@@ -16,6 +16,7 @@ document.onclick = onDocumentClick
 window.CarSimPhysics.initializeWorld(state)
 window.CarSimEnvironment.resizeCanvas(canvas)
 window.CarSimUI.initializeControls(state)
+window.CarSimUI.initializeTelemetryPanel()
 window.CarSimUI.initializeMusicButton(state, music, musicToggle)
 
 requestAnimationFrame(draw)
@@ -49,6 +50,7 @@ function draw() {
     ctx.restore()
 
     window.CarSimUI.drawHud(ctx, canvas, state.car)
+    window.CarSimUI.updateTelemetryPanel(state)
     requestAnimationFrame(draw)
 }
 

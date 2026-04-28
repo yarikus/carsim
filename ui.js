@@ -1,6 +1,8 @@
 "use strict"
 
 window.CarSimUI = (function() {
+    var telemetryGrid = null
+
     function initializeControls(state) {
         var configControls = document.querySelectorAll("[data-config]")
         var shadowToggle = document.getElementById("showShadowsToggle")
@@ -111,6 +113,37 @@ window.CarSimUI = (function() {
         ctx.restore()
     }
 
+    function initializeTelemetryPanel() {
+        telemetryGrid = document.getElementById("telemetryGrid")
+    }
+
+    function updateTelemetryPanel(state) {
+        var rows
+
+        if (!telemetryGrid) {
+            return
+        }
+
+        rows = [
+            { label: "Speed", value: formatTelemetryValue(state.car.displayVelocity, " km/h") },
+            { label: "Velocity", value: formatTelemetryNumber(state.car.velocity) },
+            { label: "Forward force", value: formatTelemetryNumber(state.car.forceFoward) },
+            { label: "Reverse force", value: formatTelemetryNumber(state.car.forceBackward) },
+            { label: "Steering", value: formatTelemetryValue(state.car.steeringAngle, " deg") },
+            { label: "Steer limit", value: formatTelemetryValue(state.physicsConfig.maxSteeringAngle, " deg") },
+            { label: "Acceleration", value: formatTelemetryNumber(state.physicsConfig.baseForce) },
+            { label: "Turn speed", value: formatTelemetryNumber(state.physicsConfig.baseTurningSpeed) },
+            { label: "Friction", value: formatTelemetryNumber(state.physicsConfig.surfaceFriction) },
+            { label: "Max forward", value: formatTelemetryNumber(state.physicsConfig.maxSpeedFront) },
+            { label: "Max reverse", value: formatTelemetryNumber(state.physicsConfig.maxSpeedBack) },
+            { label: "Trailer", value: state.debugDetachTrailer ? "Detached" : "Hitched" }
+        ]
+
+        telemetryGrid.innerHTML = rows.map(function(row) {
+            return '<span class="telemetry-label">' + row.label + '</span><span class="telemetry-value">' + row.value + '</span>'
+        }).join("")
+    }
+
     function drawCar(ctx, state) {
         window.CarSimVehicleAppearance.drawCar(ctx, state.car, state.wheels, {
             wheelsOnly: state.modelDebugWheelsOnly,
@@ -169,10 +202,34 @@ window.CarSimUI = (function() {
         return numericValue.toFixed(3).replace(/0+$/, "").replace(/\.$/, "")
     }
 
+    function formatTelemetryValue(value, suffix) {
+        return formatTelemetryNumber(value) + suffix
+    }
+
+    function formatTelemetryNumber(value) {
+        var numericValue = Number(value)
+
+        if (Math.abs(numericValue) >= 100) {
+            return numericValue.toFixed(0)
+        }
+
+        if (Math.abs(numericValue) >= 10) {
+            return numericValue.toFixed(1)
+        }
+
+        if (Math.abs(numericValue) >= 1) {
+            return numericValue.toFixed(2)
+        }
+
+        return numericValue.toFixed(3).replace(/0+$/, "").replace(/\.$/, "")
+    }
+
     return {
         initializeControls: initializeControls,
+        initializeTelemetryPanel: initializeTelemetryPanel,
         initializeMusicButton: initializeMusicButton,
         musicControl: musicControl,
+        updateTelemetryPanel: updateTelemetryPanel,
         drawHud: drawHud,
         drawCar: drawCar,
         drawTrailer: drawTrailer
