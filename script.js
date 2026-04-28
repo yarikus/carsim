@@ -85,17 +85,17 @@ function onResize() {
 }
 
 function onCanvasClick() {
-    music.muted = false
+    window.CarSimMusicPlayer.activateFromInteraction(state, music)
 }
 
 function onDocumentClick() {
-    music.muted = false
+    window.CarSimMusicPlayer.activateFromInteraction(state, music)
 }
 
 function onKeyDown(evt) {
     state.keyArray[evt.key] = true
     state.keyArray[evt.code] = true
-    music.muted = false
+    window.CarSimMusicPlayer.activateFromInteraction(state, music)
 }
 
 function onKeyUp(evt) {
