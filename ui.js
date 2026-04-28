@@ -2,6 +2,8 @@
 
 window.CarSimUI = (function() {
     var telemetryGrid = null
+    var clockValue = null
+    var timeOfDayValue = null
 
     function initializeControls(state) {
         var configControls = document.querySelectorAll("[data-config]")
@@ -127,6 +129,30 @@ window.CarSimUI = (function() {
         syncTelemetryVisibility({ debugShowTelemetry: true })
     }
 
+    function initializeClockPanel() {
+        clockValue = document.getElementById("clockValue")
+        timeOfDayValue = document.getElementById("timeOfDayValue")
+    }
+
+    function updateClockPanel(state) {
+        var totalSeconds
+        var hours
+        var minutes
+
+        if (!clockValue) {
+            return
+        }
+
+        totalSeconds = Math.floor(state.gameTimeSeconds)
+        hours = Math.floor(totalSeconds / 3600) % 24
+        minutes = Math.floor((totalSeconds % 3600) / 60)
+        clockValue.textContent = padTimeValue(hours) + ":" + padTimeValue(minutes)
+
+        if (timeOfDayValue) {
+            timeOfDayValue.textContent = window.CarSimPhysics.getTimeOfDay(state)
+        }
+    }
+
     function updateTelemetryPanel(state) {
         var rows
 
@@ -244,11 +270,17 @@ window.CarSimUI = (function() {
         telemetryPanel.style.display = state.debugShowTelemetry ? "block" : "none"
     }
 
+    function padTimeValue(value) {
+        return value < 10 ? "0" + value : String(value)
+    }
+
     return {
         initializeControls: initializeControls,
+        initializeClockPanel: initializeClockPanel,
         initializeTelemetryPanel: initializeTelemetryPanel,
         initializeMusicButton: initializeMusicButton,
         musicControl: musicControl,
+        updateClockPanel: updateClockPanel,
         updateTelemetryPanel: updateTelemetryPanel,
         drawHud: drawHud,
         drawCar: drawCar,

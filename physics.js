@@ -54,6 +54,8 @@ window.CarSimPhysics = (function() {
             debugShowTelemetry: true,
             graphicsShowShadows: true,
             graphicsShowWheels: true,
+            gameTimeSeconds: 9 * 60 * 60,
+            gameTimeScale: 120,
             wheelTrails: {
                 frontLeft: [],
                 frontRight: [],
@@ -108,6 +110,31 @@ window.CarSimPhysics = (function() {
         resolveTrailerCollision(state, previousCarState, previousTrailerState)
         updateWheelSpin(state)
         updateWheelTrails(state)
+    }
+
+    function updateGameTime(state, deltaSeconds) {
+        var fullDaySeconds = 24 * 60 * 60
+
+        state.gameTimeSeconds += Math.max(0, deltaSeconds) * state.gameTimeScale
+        state.gameTimeSeconds %= fullDaySeconds
+    }
+
+    function getTimeOfDay(state) {
+        var hours = state.gameTimeSeconds / 3600
+
+        if (hours >= 5 && hours < 10) {
+            return "Morning"
+        }
+
+        if (hours >= 10 && hours < 18) {
+            return "Day"
+        }
+
+        if (hours >= 18 && hours < 22) {
+            return "Evening"
+        }
+
+        return "Night"
     }
 
     function processKeys(state, music) {
@@ -518,6 +545,8 @@ window.CarSimPhysics = (function() {
         createState: createState,
         initializeWorld: initializeWorld,
         moveCar: moveCar,
+        updateGameTime: updateGameTime,
+        getTimeOfDay: getTimeOfDay,
         processKeys: processKeys,
         clearWheelTrails: clearWheelTrails,
         getDebugHitboxes: getDebugHitboxes,

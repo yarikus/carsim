@@ -100,6 +100,76 @@
                 background: linear-gradient(180deg, rgb(72, 108, 38) 0%, rgb(92, 128, 54) 100%);
             }
 
+            .clock-panel {
+                position: fixed;
+                top: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                display: flex;
+                align-items: center;
+                gap: 14px;
+                min-width: 220px;
+                padding: 10px 16px;
+                border: 1px solid rgba(255, 255, 255, 0.14);
+                border-radius: 16px;
+                background: rgba(10, 12, 14, 0.36);
+                backdrop-filter: blur(10px);
+                -webkit-backdrop-filter: blur(10px);
+                color: rgba(255, 255, 255, 0.96);
+                z-index: 2;
+                pointer-events: none;
+                box-sizing: border-box;
+            }
+
+            .clock-main {
+                min-width: 120px;
+                text-align: center;
+            }
+
+            .clock-label {
+                display: block;
+                margin-bottom: 2px;
+                font-size: 11px;
+                letter-spacing: 0.1em;
+                text-transform: uppercase;
+                color: rgba(255, 255, 255, 0.62);
+            }
+
+            .clock-value {
+                display: block;
+                font-size: 28px;
+                font-weight: 700;
+                font-variant-numeric: tabular-nums;
+                letter-spacing: 0.04em;
+            }
+
+            .clock-divider {
+                width: 1px;
+                align-self: stretch;
+                background: rgba(255, 255, 255, 0.12);
+            }
+
+            .time-of-day {
+                min-width: 72px;
+                text-align: left;
+            }
+
+            .time-of-day-label {
+                display: block;
+                margin-bottom: 2px;
+                font-size: 11px;
+                letter-spacing: 0.08em;
+                text-transform: uppercase;
+                color: rgba(255, 255, 255, 0.56);
+            }
+
+            .time-of-day-value {
+                display: block;
+                font-size: 18px;
+                font-weight: 700;
+                color: rgba(255, 255, 255, 0.94);
+            }
+
             .telemetry-panel {
                 position: fixed;
                 right: 332px;
@@ -265,6 +335,17 @@
                     <span></span>
                 </span>
             </button>
+            <section class="clock-panel" id="clockPanel" aria-label="Game time">
+                <div class="clock-main">
+                    <span class="clock-label">Game Time</span>
+                    <span class="clock-value" id="clockValue">09:00</span>
+                </div>
+                <div class="clock-divider" aria-hidden="true"></div>
+                <div class="time-of-day">
+                    <span class="time-of-day-label">Time of day</span>
+                    <span class="time-of-day-value" id="timeOfDayValue">Morning</span>
+                </div>
+            </section>
             <canvas id="tela" width="1280" height="680"></canvas>
             <section class="telemetry-panel" id="telemetryPanel" aria-label="Vehicle telemetry">
                 <h3>Vehicle Telemetry</h3>
