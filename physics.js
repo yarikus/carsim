@@ -121,6 +121,7 @@ window.CarSimPhysics = (function() {
 
         updateTrailer(state)
         resolveTrailerCollision(state, previousCarState, previousTrailerState)
+        resolveSpawnedVehicleCollision(state, previousCarState, previousTrailerState)
         updateWheelSpin(state)
         updateWheelTrails(state)
     }
@@ -283,10 +284,30 @@ window.CarSimPhysics = (function() {
 
         restoreBodyState(state.car, previousCarState)
         restoreBodyState(state.trailer, previousTrailerState)
-        state.car.velocity = 0
-        state.car.forceFoward = 0
-        state.car.forceBackward = 0
-        state.car.displayVelocity = 0
+        resetCarMotion(state.car)
+    }
+
+    function resolveSpawnedVehicleCollision(state, previousCarState, previousTrailerState) {
+        var carBox = getCarCollisionBox(state.car)
+        var i
+
+        for (i = 0; i < state.spawnedVehicles.length; i++) {
+            if (!bodiesColliding(carBox, getCarCollisionBox(state.spawnedVehicles[i]))) {
+                continue
+            }
+
+            restoreBodyState(state.car, previousCarState)
+            restoreBodyState(state.trailer, previousTrailerState)
+            resetCarMotion(state.car)
+            return
+        }
+    }
+
+    function resetCarMotion(car) {
+        car.velocity = 0
+        car.forceFoward = 0
+        car.forceBackward = 0
+        car.displayVelocity = 0
     }
 
     function resetTrailerToHitch(state) {
@@ -603,7 +624,7 @@ window.CarSimPhysics = (function() {
     }
 
     function getDebugHitboxes(state) {
-        return [
+        var hitboxes = [
             {
                 label: "Tractor",
                 strokeStyle: "rgba(87, 214, 255, 0.95)",
@@ -617,6 +638,22 @@ window.CarSimPhysics = (function() {
                 box: getTrailerCollisionBox(state.trailer)
             }
         ]
+
+        appendSpawnedVehicleHitboxes(state, hitboxes)
+        return hitboxes
+    }
+
+    function appendSpawnedVehicleHitboxes(state, hitboxes) {
+        var i
+
+        for (i = 0; i < state.spawnedVehicles.length; i++) {
+            hitboxes.push({
+                label: "Vehicle " + (i + 1),
+                strokeStyle: "rgba(158, 255, 96, 0.95)",
+                fillStyle: "rgba(158, 255, 96, 0.12)",
+                box: getCarCollisionBox(state.spawnedVehicles[i])
+            })
+        }
     }
 
     return {
