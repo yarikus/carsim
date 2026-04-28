@@ -17,6 +17,7 @@ window.CarSimEnvironment = (function() {
         drawWheelTrails(ctx, state)
         drawDebugHitboxes(ctx, state)
         drawVehicleRadiusDebug(ctx, state)
+        drawAttachRadiusDebug(ctx, state)
         ctx.restore()
     }
 
@@ -150,6 +151,40 @@ window.CarSimEnvironment = (function() {
             ctx.fillStyle = "rgba(164, 255, 110, 0.95)"
             ctx.beginPath()
             ctx.arc(radiusDebug.targetCenter.x, radiusDebug.targetCenter.y, 5, 0, Math.PI * 2)
+            ctx.fill()
+        }
+
+        ctx.restore()
+    }
+
+    function drawAttachRadiusDebug(ctx, state) {
+        var attachDebug
+
+        if (!state.debugShowAttachRadius) {
+            return
+        }
+
+        attachDebug = window.CarSimPhysics.getAttachRadiusDebug(state)
+
+        ctx.save()
+        ctx.strokeStyle = attachDebug.canAttach ? "rgba(160, 255, 90, 0.95)" : "rgba(255, 214, 84, 0.95)"
+        ctx.fillStyle = attachDebug.canAttach ? "rgba(160, 255, 90, 0.08)" : "rgba(255, 214, 84, 0.08)"
+        ctx.lineWidth = 2
+        ctx.setLineDash([10, 8])
+        ctx.beginPath()
+        ctx.arc(attachDebug.centerX, attachDebug.centerY, attachDebug.radius, 0, Math.PI * 2)
+        ctx.fill()
+        ctx.stroke()
+        ctx.setLineDash([])
+
+        ctx.fillStyle = attachDebug.canAttach ? "rgba(160, 255, 90, 0.95)" : "rgba(255, 214, 84, 0.95)"
+        ctx.beginPath()
+        ctx.arc(attachDebug.centerX, attachDebug.centerY, 4, 0, Math.PI * 2)
+        ctx.fill()
+
+        if (attachDebug.trailerX !== null && attachDebug.trailerY !== null) {
+            ctx.beginPath()
+            ctx.arc(attachDebug.trailerX, attachDebug.trailerY, 5, 0, Math.PI * 2)
             ctx.fill()
         }
 

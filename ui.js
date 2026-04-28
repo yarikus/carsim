@@ -20,6 +20,8 @@ window.CarSimUI = (function() {
         var hitboxToggle = document.getElementById("hitboxDebugToggle")
         var telemetryToggle = document.getElementById("telemetryDebugToggle")
         var radiusToggle = document.getElementById("vehicleRadiusDebugToggle")
+        var attachRadiusToggle = document.getElementById("attachRadiusDebugToggle")
+        var trailerAttachButton = document.getElementById("toggleTrailerAttachButton")
         var spawnVehicleButton = document.getElementById("spawnVehicleButton")
         var i
 
@@ -86,13 +88,27 @@ window.CarSimUI = (function() {
             })
         }
 
+        if (attachRadiusToggle) {
+            attachRadiusToggle.checked = state.debugShowAttachRadius
+            attachRadiusToggle.addEventListener("change", function(evt) {
+                state.debugShowAttachRadius = evt.target.checked
+            })
+        }
+
+        if (trailerAttachButton) {
+            trailerAttachButton.addEventListener("click", function() {
+                window.CarSimPhysics.toggleTrailerAttachment(state)
+                updateTrailerAttachButton(state)
+            })
+            updateTrailerAttachButton(state)
+        }
+
         if (spawnVehicleButton) {
             spawnVehicleButton.addEventListener("click", function() {
                 window.CarSimPhysics.spawnRandomVehicle(state)
             })
         }
 
-        initializeDetachTrailerToggle(state)
     }
 
     function initializeMusicButton(state, music, musicToggle) {
@@ -228,22 +244,26 @@ window.CarSimUI = (function() {
         })
     }
 
-    function initializeDetachTrailerToggle(state) {
-        var detachTrailerToggle = document.getElementById("detachTrailerToggle")
+    function updateTrailerAttachButton(state) {
+        var trailerAttachButton = document.getElementById("toggleTrailerAttachButton")
+        var canAttach
 
-        if (!detachTrailerToggle) {
+        if (!trailerAttachButton) {
             return
         }
 
-        detachTrailerToggle.checked = state.debugDetachTrailer
-        detachTrailerToggle.addEventListener("change", function(evt) {
-            state.debugDetachTrailer = evt.target.checked
-            if (state.debugDetachTrailer) {
-                window.CarSimPhysics.releaseTrailerFromHitch(state)
-            } else {
-                window.CarSimPhysics.resetTrailerToHitch(state)
-            }
-        })
+        canAttach = window.CarSimPhysics.canAttachTrailer(state)
+
+        if (state.debugDetachTrailer) {
+            trailerAttachButton.textContent = canAttach ? "Attach trailer" : "Attach trailer (out of range)"
+            trailerAttachButton.disabled = !canAttach
+            trailerAttachButton.style.opacity = canAttach ? "1" : "0.55"
+            return
+        }
+
+        trailerAttachButton.textContent = "Detach trailer"
+        trailerAttachButton.disabled = false
+        trailerAttachButton.style.opacity = "1"
     }
 
     function syncControlValue(control) {
@@ -314,6 +334,7 @@ window.CarSimUI = (function() {
         musicControl: musicControl,
         updateClockPanel: updateClockPanel,
         updateTelemetryPanel: updateTelemetryPanel,
+        updateTrailerAttachButton: updateTrailerAttachButton,
         drawHud: drawHud,
         drawCar: drawCar,
         drawTrailer: drawTrailer,

@@ -77,6 +77,7 @@ function draw(timestamp) {
     window.CarSimUI.drawHud(ctx, canvas, state.car)
     window.CarSimUI.updateClockPanel(state)
     window.CarSimUI.updateTelemetryPanel(state)
+    window.CarSimUI.updateTrailerAttachButton(state)
     requestAnimationFrame(draw)
 }
 

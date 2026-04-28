@@ -5,6 +5,7 @@ window.CarSimPhysics = (function() {
     var steeringResponse = 0.22
     var maxArticulationAngle = 78
     var vehicleSwapRadius = 230
+    var trailerAttachRadius = 120
 
     function createState() {
         return {
@@ -55,6 +56,7 @@ window.CarSimPhysics = (function() {
             debugDetachTrailer: false,
             debugShowTelemetry: true,
             debugShowVehicleRadius: false,
+            debugShowAttachRadius: false,
             graphicsShowShadows: true,
             graphicsShowWheels: true,
             gameTimeSeconds: 9 * 60 * 60,
@@ -422,6 +424,7 @@ window.CarSimPhysics = (function() {
         var angle = trailer.facingAngle * Math.PI / 180
         var releaseDistance = Math.max(72, trailer.width * 0.22)
 
+        state.debugDetachTrailer = true
         state.trailerAttachedSpawnedVehicleIndex = null
         trailer.xPosition -= Math.cos(angle) * releaseDistance
         trailer.yPosition -= Math.sin(angle) * releaseDistance
@@ -472,6 +475,44 @@ window.CarSimPhysics = (function() {
         }
 
         return normalized
+    }
+
+    function toggleTrailerAttachment(state) {
+        if (state.debugDetachTrailer) {
+            return attachTrailerIfPossible(state)
+        }
+
+        releaseTrailerFromHitch(state)
+        return true
+    }
+
+    function attachTrailerIfPossible(state) {
+        if (!canAttachTrailer(state)) {
+            return false
+        }
+
+        state.debugDetachTrailer = false
+        state.trailerAttachedSpawnedVehicleIndex = null
+        attachTrailerToActiveCar(state)
+        return true
+    }
+
+    function canAttachTrailer(state) {
+        var hitchPosition = getCarHitchPosition(state.car)
+        var trailerKingpinPosition = getTrailerKingpinPosition(state.trailer)
+
+        if (!state.debugDetachTrailer) {
+            return true
+        }
+
+        return Math.hypot(trailerKingpinPosition.x - hitchPosition.x, trailerKingpinPosition.y - hitchPosition.y) <= trailerAttachRadius
+    }
+
+    function getTrailerKingpinPosition(trailer) {
+        return {
+            x: trailer.xPosition,
+            y: trailer.yPosition
+        }
     }
 
     function getCarCollisionBox(car) {
@@ -782,6 +823,20 @@ window.CarSimPhysics = (function() {
         }
     }
 
+    function getAttachRadiusDebug(state) {
+        var hitchPosition = getCarHitchPosition(state.car)
+        var trailerKingpinPosition = getTrailerKingpinPosition(state.trailer)
+
+        return {
+            centerX: hitchPosition.x,
+            centerY: hitchPosition.y,
+            trailerX: trailerKingpinPosition.x,
+            trailerY: trailerKingpinPosition.y,
+            radius: trailerAttachRadius,
+            canAttach: canAttachTrailer(state)
+        }
+    }
+
     function appendSpawnedVehicleHitboxes(state, hitboxes) {
         var i
 
@@ -803,9 +858,12 @@ window.CarSimPhysics = (function() {
         getTimeOfDay: getTimeOfDay,
         processKeys: processKeys,
         spawnRandomVehicle: spawnRandomVehicle,
+        toggleTrailerAttachment: toggleTrailerAttachment,
+        canAttachTrailer: canAttachTrailer,
         clearWheelTrails: clearWheelTrails,
         getDebugHitboxes: getDebugHitboxes,
         getVehicleRadiusDebug: getVehicleRadiusDebug,
+        getAttachRadiusDebug: getAttachRadiusDebug,
         resetTrailerToHitch: resetTrailerToHitch,
         releaseTrailerFromHitch: releaseTrailerFromHitch,
         getCarCenter: getCarCenter
