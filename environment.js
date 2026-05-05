@@ -219,6 +219,13 @@ window.CarSimEnvironment = (function() {
         ctx.fill()
 
         if (attachDebug.trailerX !== null && attachDebug.trailerY !== null) {
+            ctx.strokeStyle = attachDebug.canAttach ? "rgba(160, 255, 90, 0.9)" : "rgba(255, 214, 84, 0.9)"
+            ctx.lineWidth = 3
+            ctx.beginPath()
+            ctx.moveTo(attachDebug.centerX, attachDebug.centerY)
+            ctx.lineTo(attachDebug.trailerX, attachDebug.trailerY)
+            ctx.stroke()
+
             ctx.beginPath()
             ctx.arc(attachDebug.trailerX, attachDebug.trailerY, 5, 0, Math.PI * 2)
             ctx.fill()
