@@ -47,6 +47,8 @@ window.CarSimPhysics = (function() {
             debugShowAttachRadius: false,
             graphicsShowShadows: true,
             graphicsShowWheels: true,
+            gameMenuOpen: false,
+            pauseMenuSelection: 0,
             gameTimeSeconds: 9 * 60 * 60,
             gameTimeScale: 120,
             spawnedVehicles: [],
@@ -233,6 +235,12 @@ window.CarSimPhysics = (function() {
 
         state.enterPressedLastFrame = enterPressed
         state.trailerTogglePressedLastFrame = trailerTogglePressed
+    }
+
+    function clearInputState(state) {
+        state.keyArray = []
+        state.enterPressedLastFrame = false
+        state.trailerTogglePressedLastFrame = false
     }
 
     function isAnyKeyPressed(keyArray, keys) {
@@ -1058,6 +1066,7 @@ window.CarSimPhysics = (function() {
         getWallCollisionBox: getWallCollisionBox,
         resetTrailerToHitch: resetTrailerToHitch,
         releaseTrailerFromHitch: releaseTrailerFromHitch,
-        getCarCenter: getCarCenter
+        getCarCenter: getCarCenter,
+        clearInputState: clearInputState
     }
 })()

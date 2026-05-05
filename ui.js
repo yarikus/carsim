@@ -4,6 +4,8 @@ window.CarSimUI = (function() {
     var telemetryGrid = null
     var clockValue = null
     var timeOfDayValue = null
+    var pauseMenuOverlay = null
+    var pauseMenuOptions = []
     var parkedVehicleWheels = {
         frontLeft: { steeringAngle: 0, spinAngle: 0 },
         frontRight: { steeringAngle: 0, spinAngle: 0 },
@@ -109,6 +111,32 @@ window.CarSimUI = (function() {
             })
         }
 
+    }
+
+    function initializePauseMenu(state) {
+        pauseMenuOverlay = document.getElementById("pauseMenuOverlay")
+        pauseMenuOptions = Array.prototype.slice.call(document.querySelectorAll("[data-pause-action]"))
+
+        pauseMenuOptions.forEach(function(option, index) {
+            option.addEventListener("mousemove", function() {
+                if (!state.gameMenuOpen) {
+                    return
+                }
+
+                setPauseMenuSelection(state, index)
+            })
+
+            option.addEventListener("click", function() {
+                if (!state.gameMenuOpen) {
+                    return
+                }
+
+                setPauseMenuSelection(state, index)
+                activatePauseMenuSelection(state)
+            })
+        })
+
+        syncPauseMenu(state)
     }
 
     function drawHud(ctx, canvas, car) {
@@ -237,6 +265,47 @@ window.CarSimUI = (function() {
         trailerAttachButton.style.opacity = "1"
     }
 
+    function togglePauseMenu(state) {
+        setPauseMenuOpen(state, !state.gameMenuOpen)
+        return state.gameMenuOpen
+    }
+
+    function setPauseMenuOpen(state, isOpen) {
+        state.gameMenuOpen = Boolean(isOpen)
+
+        if (state.gameMenuOpen) {
+            state.pauseMenuSelection = 0
+        }
+
+        syncPauseMenu(state)
+    }
+
+    function handlePauseMenuKey(state, evt) {
+        if (!state.gameMenuOpen) {
+            return false
+        }
+
+        if (matchesAnyKey(evt, ["ArrowUp", "KeyW", "w", "W"])) {
+            evt.preventDefault()
+            movePauseMenuSelection(state, -1)
+            return true
+        }
+
+        if (matchesAnyKey(evt, ["ArrowDown", "KeyS", "s", "S"])) {
+            evt.preventDefault()
+            movePauseMenuSelection(state, 1)
+            return true
+        }
+
+        if (matchesAnyKey(evt, ["Enter", "NumpadEnter", " ", "Space"])) {
+            evt.preventDefault()
+            activatePauseMenuSelection(state)
+            return true
+        }
+
+        return false
+    }
+
     function syncControlValue(control) {
         var valueLabel = document.querySelector('[data-value-for="' + control.id + '"]')
 
@@ -293,6 +362,93 @@ window.CarSimUI = (function() {
         telemetryPanel.style.display = state.debugShowTelemetry ? "block" : "none"
     }
 
+    function syncPauseMenu(state) {
+        var simShell = document.querySelector(".sim-shell")
+
+        if (!pauseMenuOverlay) {
+            return
+        }
+
+        pauseMenuOverlay.classList.toggle("is-visible", state.gameMenuOpen)
+        pauseMenuOverlay.setAttribute("aria-hidden", state.gameMenuOpen ? "false" : "true")
+
+        if (simShell) {
+            simShell.classList.toggle("is-menu-open", state.gameMenuOpen)
+        }
+
+        syncPauseMenuSelection(state)
+    }
+
+    function exitGame() {
+        window.close()
+
+        if (window.history.length > 1) {
+            window.history.back()
+            return
+        }
+
+        window.location.replace("about:blank")
+    }
+
+    function setPauseMenuSelection(state, nextIndex) {
+        var optionCount = pauseMenuOptions.length
+
+        if (!optionCount) {
+            state.pauseMenuSelection = 0
+            return
+        }
+
+        state.pauseMenuSelection = normalizePauseMenuIndex(nextIndex, optionCount)
+        syncPauseMenuSelection(state)
+    }
+
+    function movePauseMenuSelection(state, direction) {
+        setPauseMenuSelection(state, state.pauseMenuSelection + direction)
+    }
+
+    function activatePauseMenuSelection(state) {
+        var activeOption = pauseMenuOptions[state.pauseMenuSelection]
+        var action
+
+        if (!activeOption) {
+            return
+        }
+
+        action = activeOption.dataset.pauseAction
+
+        if (action === "continue") {
+            setPauseMenuOpen(state, false)
+            return
+        }
+
+        if (action === "exit") {
+            exitGame()
+        }
+    }
+
+    function syncPauseMenuSelection(state) {
+        var selectedIndex = normalizePauseMenuIndex(state.pauseMenuSelection, pauseMenuOptions.length)
+
+        pauseMenuOptions.forEach(function(option, index) {
+            var isActive = state.gameMenuOpen && index === selectedIndex
+
+            option.classList.toggle("is-active", isActive)
+            option.setAttribute("aria-selected", isActive ? "true" : "false")
+        })
+    }
+
+    function normalizePauseMenuIndex(index, optionCount) {
+        if (!optionCount) {
+            return 0
+        }
+
+        return (index % optionCount + optionCount) % optionCount
+    }
+
+    function matchesAnyKey(evt, keys) {
+        return keys.indexOf(evt.key) !== -1 || keys.indexOf(evt.code) !== -1
+    }
+
     function padTimeValue(value) {
         return value < 10 ? "0" + value : String(value)
     }
@@ -301,9 +457,13 @@ window.CarSimUI = (function() {
         initializeControls: initializeControls,
         initializeClockPanel: initializeClockPanel,
         initializeTelemetryPanel: initializeTelemetryPanel,
+        initializePauseMenu: initializePauseMenu,
         updateClockPanel: updateClockPanel,
         updateTelemetryPanel: updateTelemetryPanel,
         updateTrailerAttachButton: updateTrailerAttachButton,
+        handlePauseMenuKey: handlePauseMenuKey,
+        togglePauseMenu: togglePauseMenu,
+        setPauseMenuOpen: setPauseMenuOpen,
         drawHud: drawHud,
         drawCar: drawCar,
         drawTrailer: drawTrailer,

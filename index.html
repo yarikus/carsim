@@ -25,6 +25,7 @@
                 position: relative;
                 flex: 1;
                 min-width: 0;
+                isolation: isolate;
             }
 
             .music-player {
@@ -346,6 +347,160 @@
                 font-variant-numeric: tabular-nums;
             }
 
+            .pause-menu-overlay {
+                position: absolute;
+                inset: 0;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 32px;
+                box-sizing: border-box;
+                background:
+                    radial-gradient(circle at center, rgba(255, 168, 58, 0.12) 0%, rgba(255, 168, 58, 0) 42%),
+                    rgba(4, 6, 8, 0.7);
+                backdrop-filter: blur(10px);
+                -webkit-backdrop-filter: blur(10px);
+                opacity: 0;
+                visibility: hidden;
+                pointer-events: none;
+                transition: opacity 0.22s ease, visibility 0.22s ease;
+                z-index: 6;
+            }
+
+            .pause-menu-overlay.is-visible {
+                opacity: 1;
+                visibility: visible;
+                pointer-events: auto;
+            }
+
+            .pause-menu-panel {
+                width: min(460px, 100%);
+                padding: 32px 32px 28px;
+                border: 1px solid rgba(255, 255, 255, 0.12);
+                border-radius: 26px;
+                background:
+                    linear-gradient(180deg, rgba(24, 28, 33, 0.96) 0%, rgba(11, 13, 16, 0.96) 100%);
+                box-shadow:
+                    0 26px 70px rgba(0, 0, 0, 0.5),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+                text-align: left;
+                color: rgba(255, 255, 255, 0.96);
+            }
+
+            .pause-menu-kicker {
+                display: block;
+                margin-bottom: 10px;
+                font-size: 11px;
+                font-weight: 700;
+                letter-spacing: 0.22em;
+                text-transform: uppercase;
+                color: rgba(255, 191, 103, 0.82);
+            }
+
+            .pause-menu-title {
+                margin: 0;
+                font-family: "Arial Black", Impact, sans-serif;
+                font-size: clamp(34px, 5vw, 46px);
+                letter-spacing: 0.12em;
+                text-transform: uppercase;
+                color: rgba(255, 255, 255, 0.98);
+            }
+
+            .pause-menu-copy {
+                margin: 12px 0 24px;
+                max-width: 320px;
+                font-size: 15px;
+                line-height: 1.5;
+                color: rgba(255, 255, 255, 0.66);
+            }
+
+            .pause-menu-options {
+                display: grid;
+                gap: 10px;
+                margin: 0;
+                padding: 0;
+                list-style: none;
+            }
+
+            .pause-menu-option {
+                width: 100%;
+                display: grid;
+                grid-template-columns: 26px minmax(0, 1fr) auto;
+                align-items: center;
+                gap: 14px;
+                padding: 18px 20px;
+                border: 1px solid rgba(255, 255, 255, 0.14);
+                border-radius: 18px;
+                background: rgba(255, 255, 255, 0.06);
+                box-sizing: border-box;
+                transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease;
+                opacity: 0.72;
+            }
+
+            .pause-menu-option.is-active {
+                transform: translateX(6px);
+                border-color: rgba(255, 208, 138, 0.72);
+                background: linear-gradient(180deg, rgba(255, 190, 94, 0.22) 0%, rgba(255, 124, 53, 0.14) 100%);
+                box-shadow:
+                    0 14px 28px rgba(255, 144, 57, 0.18),
+                    inset 0 0 0 1px rgba(255, 217, 160, 0.08);
+                opacity: 1;
+            }
+
+            .pause-menu-selector {
+                font-family: "Arial Black", Impact, sans-serif;
+                font-size: 20px;
+                letter-spacing: 0.12em;
+                color: rgba(255, 208, 138, 0.92);
+                opacity: 0;
+                transform: translateX(-4px);
+                transition: opacity 0.18s ease, transform 0.18s ease;
+            }
+
+            .pause-menu-option.is-active .pause-menu-selector {
+                opacity: 1;
+                transform: translateX(0);
+            }
+
+            .pause-menu-option-label {
+                display: block;
+                font-size: 18px;
+                font-weight: 700;
+                letter-spacing: 0.08em;
+                text-transform: uppercase;
+                color: rgba(255, 255, 255, 0.96);
+            }
+
+            .pause-menu-option-caption {
+                display: block;
+                margin-top: 4px;
+                font-size: 12px;
+                letter-spacing: 0.08em;
+                text-transform: uppercase;
+                color: rgba(255, 255, 255, 0.45);
+            }
+
+            .pause-menu-option-key {
+                font-size: 12px;
+                font-weight: 700;
+                letter-spacing: 0.14em;
+                text-transform: uppercase;
+                color: rgba(255, 255, 255, 0.48);
+            }
+
+            .pause-menu-option.is-active .pause-menu-option-key {
+                color: rgba(255, 225, 178, 0.84);
+            }
+
+            .pause-menu-hint {
+                display: block;
+                margin-top: 18px;
+                font-size: 12px;
+                letter-spacing: 0.12em;
+                text-transform: uppercase;
+                color: rgba(255, 255, 255, 0.42);
+            }
+
             .sidebar {
                 width: 312px;
                 flex: 0 0 312px;
@@ -522,6 +677,32 @@
             <section class="telemetry-panel" id="telemetryPanel" aria-label="Vehicle telemetry">
                 <h3>Vehicle Telemetry</h3>
                 <div class="telemetry-grid" id="telemetryGrid"></div>
+            </section>
+            <section class="pause-menu-overlay" id="pauseMenuOverlay" aria-hidden="true">
+                <div class="pause-menu-panel" role="dialog" aria-modal="true" aria-labelledby="pauseMenuTitle">
+                    <span class="pause-menu-kicker">Game Menu</span>
+                    <h2 class="pause-menu-title" id="pauseMenuTitle">Paused</h2>
+                    <p class="pause-menu-copy">Take a breath, tune the next move, and jump straight back behind the wheel.</p>
+                    <div class="pause-menu-options" id="pauseMenuOptions" role="listbox" aria-label="Pause menu options">
+                        <div class="pause-menu-option" id="pauseMenuContinueButton" data-pause-action="continue" data-pause-index="0" role="option" aria-selected="false">
+                            <span class="pause-menu-selector" aria-hidden="true">&gt;</span>
+                            <span>
+                                <span class="pause-menu-option-label">Continue</span>
+                                <span class="pause-menu-option-caption">Return to the road</span>
+                            </span>
+                            <span class="pause-menu-option-key">Enter</span>
+                        </div>
+                        <div class="pause-menu-option" id="pauseMenuExitButton" data-pause-action="exit" data-pause-index="1" role="option" aria-selected="false">
+                            <span class="pause-menu-selector" aria-hidden="true">&gt;</span>
+                            <span>
+                                <span class="pause-menu-option-label">Exit</span>
+                                <span class="pause-menu-option-caption">Leave current session</span>
+                            </span>
+                            <span class="pause-menu-option-key">Enter</span>
+                        </div>
+                    </div>
+                    <span class="pause-menu-hint">Arrows or W / S to navigate | Enter to select | Esc to resume</span>
+                </div>
             </section>
         </div>
         <aside class="sidebar">

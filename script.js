@@ -16,6 +16,7 @@ document.onclick = onDocumentClick
 window.CarSimPhysics.initializeWorld(state)
 window.CarSimEnvironment.resizeCanvas(canvas)
 window.CarSimUI.initializeControls(state)
+window.CarSimUI.initializePauseMenu(state)
 window.CarSimUI.initializeClockPanel()
 window.CarSimUI.initializeTelemetryPanel()
 window.CarSimMusicPlayer.initialize(state, music)
@@ -38,9 +39,12 @@ function draw(timestamp) {
     lastFrameTime = timestamp
 
     window.CarSimMusicPlayer.musicControl(state, music)
-    window.CarSimPhysics.processKeys(state, music)
-    window.CarSimPhysics.moveCar(state)
-    window.CarSimPhysics.updateGameTime(state, deltaSeconds)
+
+    if (!state.gameMenuOpen) {
+        window.CarSimPhysics.processKeys(state, music)
+        window.CarSimPhysics.moveCar(state)
+        window.CarSimPhysics.updateGameTime(state, deltaSeconds)
+    }
 
     ctx.clearRect(0, 0, canvas.width, canvas.height)
     window.CarSimEnvironment.drawEnvironment(ctx, canvas, state)
@@ -93,12 +97,32 @@ function onDocumentClick() {
 }
 
 function onKeyDown(evt) {
+    if (evt.key === "Escape" || evt.code === "Escape") {
+        evt.preventDefault()
+
+        if (!evt.repeat) {
+            window.CarSimPhysics.clearInputState(state)
+            window.CarSimUI.togglePauseMenu(state)
+        }
+
+        return
+    }
+
+    if (state.gameMenuOpen) {
+        window.CarSimUI.handlePauseMenuKey(state, evt)
+        return
+    }
+
     state.keyArray[evt.key] = true
     state.keyArray[evt.code] = true
     window.CarSimMusicPlayer.activateFromInteraction(state, music)
 }
 
 function onKeyUp(evt) {
+    if (evt.key === "Escape" || evt.code === "Escape") {
+        return
+    }
+
     state.keyArray[evt.key] = false
     state.keyArray[evt.code] = false
 }
