@@ -167,6 +167,7 @@ window.CarSimUI = (function() {
         rows = [
             { label: "Speed", value: formatTelemetryValue(state.car.displayVelocity, " km/h") },
             { label: "Velocity", value: formatTelemetryNumber(state.car.velocity) },
+            { label: "Mass", value: formatTelemetryValue(state.car.mass, " kg") },
             { label: "Forward force", value: formatTelemetryNumber(state.car.forceFoward) },
             { label: "Reverse force", value: formatTelemetryNumber(state.car.forceBackward) },
             { label: "Steering", value: formatTelemetryValue(state.car.steeringAngle, " deg") },
@@ -177,6 +178,7 @@ window.CarSimUI = (function() {
             { label: "Max forward", value: formatTelemetryNumber(state.physicsConfig.maxSpeedFront) },
             { label: "Max reverse", value: formatTelemetryNumber(state.physicsConfig.maxSpeedBack) },
             { label: "Trailer", value: state.debugDetachTrailer ? "Detached" : "Hitched" },
+            { label: "Wall strength", value: formatTelemetryNumber(state.world.wall.structuralStrength) },
             { label: "Nearby swap", value: state.debugShowVehicleRadius ? "Enter to switch" : "Hidden" }
         ]
 

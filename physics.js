@@ -24,7 +24,9 @@ window.CarSimPhysics = (function() {
                 frontTrack: 44,
                 rearTrack: 44,
                 hitchOffset: -36,
-                accentColor: "rgb(170, 28, 28)"
+                accentColor: "rgb(170, 28, 28)",
+                mass: 7200,
+                structuralStrength: 8200
             },
             trailer: {
                 width: 352,
@@ -34,7 +36,9 @@ window.CarSimPhysics = (function() {
                 facingAngle: 0,
                 kingpinOffset: 0,
                 axleOffset: -224,
-                wheelTrack: 44
+                wheelTrack: 44,
+                mass: 9300,
+                structuralStrength: 14000
             },
             wheels: {
                 frontLeft: createWheelState(),
@@ -62,6 +66,17 @@ window.CarSimPhysics = (function() {
             gameTimeSeconds: 9 * 60 * 60,
             gameTimeScale: 120,
             spawnedVehicles: [],
+            world: {
+                wall: {
+                    xPosition: 540,
+                    yPosition: -180,
+                    width: 460,
+                    height: 44,
+                    facingAngle: 0,
+                    mass: Number.POSITIVE_INFINITY,
+                    structuralStrength: 999999
+                }
+            },
             trailerAttachedSpawnedVehicleIndex: null,
             enterPressedLastFrame: false,
             trailerTogglePressedLastFrame: false,
@@ -100,7 +115,12 @@ window.CarSimPhysics = (function() {
             frontTrack: 44,
             rearTrack: 44,
             hitchOffset: -36,
-            accentColor: accentColor
+            accentColor: accentColor,
+            mass: 6400,
+            structuralStrength: 7000,
+            impactVelocityX: 0,
+            impactVelocityY: 0,
+            angularVelocity: 0
         }
     }
 
@@ -136,7 +156,9 @@ window.CarSimPhysics = (function() {
         car.yPosition += car.velocity * Math.sin(car.facingAngle * Math.PI / 180)
         car.displayVelocity = Math.abs(Math.round(car.velocity * 15))
 
+        updateSpawnedVehicles(state)
         updateTrailer(state)
+        resolveWallCollision(state, previousCarState, previousTrailerState)
         resolveTrailerCollision(state, previousCarState, previousTrailerState)
         if (state.activeVehicleGraceFrames > 0) {
             state.activeVehicleGraceFrames -= 1
@@ -288,6 +310,36 @@ window.CarSimPhysics = (function() {
         }
     }
 
+    function updateSpawnedVehicles(state) {
+        var i
+        var vehicle
+
+        for (i = 0; i < state.spawnedVehicles.length; i++) {
+            vehicle = state.spawnedVehicles[i]
+            vehicle.xPosition += vehicle.impactVelocityX
+            vehicle.yPosition += vehicle.impactVelocityY
+            vehicle.facingAngle += vehicle.angularVelocity
+            vehicle.impactVelocityX *= 0.94
+            vehicle.impactVelocityY *= 0.94
+            vehicle.angularVelocity *= 0.9
+            vehicle.displayVelocity = Math.round(Math.hypot(vehicle.impactVelocityX, vehicle.impactVelocityY) * 15)
+
+            if (Math.abs(vehicle.impactVelocityX) < 0.01) {
+                vehicle.impactVelocityX = 0
+            }
+
+            if (Math.abs(vehicle.impactVelocityY) < 0.01) {
+                vehicle.impactVelocityY = 0
+            }
+
+            if (Math.abs(vehicle.angularVelocity) < 0.01) {
+                vehicle.angularVelocity = 0
+            }
+
+            resolvePassiveVehicleWallCollision(state.world.wall, vehicle)
+        }
+    }
+
     function updateTrailer(state) {
         var trailer = state.trailer
         var hitchPosition
@@ -321,6 +373,23 @@ window.CarSimPhysics = (function() {
         resetCarMotion(state.car)
     }
 
+    function resolveWallCollision(state, previousCarState, previousTrailerState) {
+        var wallBox = getWallCollisionBox(state.world.wall)
+        var carBox = getCarCollisionBox(state.car)
+        var trailerBox = getTrailerCollisionBox(state.trailer)
+
+        if (
+            !bodiesColliding(carBox, wallBox) &&
+            (state.debugDetachTrailer ? !bodiesColliding(trailerBox, wallBox) : true)
+        ) {
+            return
+        }
+
+        restoreBodyState(state.car, previousCarState)
+        restoreBodyState(state.trailer, previousTrailerState)
+        resetCarMotion(state.car)
+    }
+
     function resolveSpawnedVehicleCollision(state, previousCarState, previousTrailerState) {
         var carBox = getCarCollisionBox(state.car)
         var trailerBox = getTrailerCollisionBox(state.trailer)
@@ -329,26 +398,24 @@ window.CarSimPhysics = (function() {
         for (i = 0; i < state.spawnedVehicles.length; i++) {
             if (state.trailerAttachedSpawnedVehicleIndex === i) {
                 if (bodiesColliding(carBox, getCarCollisionBox(state.spawnedVehicles[i]))) {
-                    restoreBodyState(state.car, previousCarState)
-                    restoreBodyState(state.trailer, previousTrailerState)
-                    resetCarMotion(state.car)
+                    resolveVehicleImpact(state.car, state.spawnedVehicles[i], getCarCenter(state.car), getCarCenter(state.spawnedVehicles[i]), 0.75)
                     return
                 }
 
                 continue
             }
 
-            if (
-                !bodiesColliding(carBox, getCarCollisionBox(state.spawnedVehicles[i])) &&
-                !bodiesColliding(trailerBox, getCarCollisionBox(state.spawnedVehicles[i]))
-            ) {
-                continue
+            if (bodiesColliding(carBox, getCarCollisionBox(state.spawnedVehicles[i]))) {
+                resolveVehicleImpact(state.car, state.spawnedVehicles[i], getCarCenter(state.car), getCarCenter(state.spawnedVehicles[i]), 0.82)
+                separateBodies(state.car, state.spawnedVehicles[i], getCarCenter(state.car), getCarCenter(state.spawnedVehicles[i]), 18)
+                return
             }
 
-            restoreBodyState(state.car, previousCarState)
-            restoreBodyState(state.trailer, previousTrailerState)
-            resetCarMotion(state.car)
-            return
+            if (bodiesColliding(trailerBox, getCarCollisionBox(state.spawnedVehicles[i]))) {
+                resolveVehicleImpactFromTrailer(state, state.spawnedVehicles[i])
+                restoreBodyState(state.trailer, previousTrailerState)
+                return
+            }
         }
     }
 
@@ -357,6 +424,97 @@ window.CarSimPhysics = (function() {
         car.forceFoward = 0
         car.forceBackward = 0
         car.displayVelocity = 0
+    }
+
+    function resolveVehicleImpact(activeCar, targetVehicle, activeCenter, targetCenter, transferFactor) {
+        var collisionNormal = getCollisionNormal(activeCenter, targetCenter, activeCar.facingAngle)
+        var activeDirection = {
+            x: Math.cos(activeCar.facingAngle * Math.PI / 180),
+            y: Math.sin(activeCar.facingAngle * Math.PI / 180)
+        }
+        var activeImpactVelocity = {
+            x: activeDirection.x * activeCar.velocity,
+            y: activeDirection.y * activeCar.velocity
+        }
+        var relativeVelocity = {
+            x: activeImpactVelocity.x - (targetVehicle.impactVelocityX || 0),
+            y: activeImpactVelocity.y - (targetVehicle.impactVelocityY || 0)
+        }
+        var impactSpeed = Math.max(0, relativeVelocity.x * collisionNormal.x + relativeVelocity.y * collisionNormal.y)
+        var massRatio = activeCar.mass / Math.max(1, activeCar.mass + targetVehicle.mass)
+        var transferredImpulse = impactSpeed * transferFactor * massRatio
+        var rotationSign = collisionNormal.x * activeDirection.y - collisionNormal.y * activeDirection.x
+
+        targetVehicle.impactVelocityX += collisionNormal.x * transferredImpulse
+        targetVehicle.impactVelocityY += collisionNormal.y * transferredImpulse
+        targetVehicle.angularVelocity += rotationSign * transferredImpulse * 1.4
+
+        activeCar.velocity *= 0.38
+        activeCar.forceFoward *= 0.42
+        activeCar.forceBackward *= 0.42
+        activeCar.displayVelocity = Math.abs(Math.round(activeCar.velocity * 15))
+    }
+
+    function resolveVehicleImpactFromTrailer(state, targetVehicle) {
+        var trailerCenter = getTrailerBodyCenter(state.trailer)
+        var targetCenter = getCarCenter(targetVehicle)
+        var trailerDirection = {
+            x: Math.cos(state.trailer.facingAngle * Math.PI / 180),
+            y: Math.sin(state.trailer.facingAngle * Math.PI / 180)
+        }
+        var collisionNormal = getCollisionNormal(trailerCenter, targetCenter, state.trailer.facingAngle)
+        var trailerImpactSpeed = Math.abs(state.car.velocity) * (state.trailer.mass / state.car.mass) * 0.88
+        var transferredImpulse = trailerImpactSpeed * (state.trailer.mass / Math.max(1, state.trailer.mass + targetVehicle.mass))
+        var rotationSign = collisionNormal.x * trailerDirection.y - collisionNormal.y * trailerDirection.x
+
+        targetVehicle.impactVelocityX += collisionNormal.x * transferredImpulse
+        targetVehicle.impactVelocityY += collisionNormal.y * transferredImpulse
+        targetVehicle.angularVelocity += rotationSign * transferredImpulse
+        state.car.velocity *= 0.52
+        state.car.forceFoward *= 0.5
+        state.car.forceBackward *= 0.5
+        state.car.displayVelocity = Math.abs(Math.round(state.car.velocity * 15))
+    }
+
+    function resolvePassiveVehicleWallCollision(wall, vehicle) {
+        if (!bodiesColliding(getCarCollisionBox(vehicle), getWallCollisionBox(wall))) {
+            return
+        }
+
+        vehicle.impactVelocityX *= -0.18
+        vehicle.impactVelocityY *= -0.18
+        vehicle.angularVelocity *= -0.24
+        vehicle.xPosition -= vehicle.impactVelocityX * 3
+        vehicle.yPosition -= vehicle.impactVelocityY * 3
+    }
+
+    function separateBodies(sourceVehicle, targetVehicle, sourceCenter, targetCenter, distance) {
+        var collisionNormal = getCollisionNormal(sourceCenter, targetCenter, sourceVehicle.facingAngle)
+
+        sourceVehicle.xPosition -= collisionNormal.x * distance * 0.25
+        sourceVehicle.yPosition -= collisionNormal.y * distance * 0.25
+        targetVehicle.xPosition += collisionNormal.x * distance * 0.75
+        targetVehicle.yPosition += collisionNormal.y * distance * 0.75
+    }
+
+    function getCollisionNormal(sourceCenter, targetCenter, fallbackAngleDegrees) {
+        var offsetX = targetCenter.x - sourceCenter.x
+        var offsetY = targetCenter.y - sourceCenter.y
+        var length = Math.hypot(offsetX, offsetY)
+        var fallbackAngleRadians
+
+        if (length > 0.001) {
+            return {
+                x: offsetX / length,
+                y: offsetY / length
+            }
+        }
+
+        fallbackAngleRadians = fallbackAngleDegrees * Math.PI / 180
+        return {
+            x: Math.cos(fallbackAngleRadians),
+            y: Math.sin(fallbackAngleRadians)
+        }
     }
 
     function trySwitchToNearbyVehicle(state) {
@@ -463,6 +621,17 @@ window.CarSimPhysics = (function() {
         }
     }
 
+    function getTrailerBodyCenter(trailer) {
+        var bodyLength = trailer.width * 0.84
+        var localCenterX = -bodyLength * 0.5 + trailer.width * 0.12
+        var angle = trailer.facingAngle * Math.PI / 180
+
+        return {
+            x: trailer.xPosition + Math.cos(angle) * localCenterX,
+            y: trailer.yPosition + Math.sin(angle) * localCenterX
+        }
+    }
+
     function clampArticulationAngle(tractorAngle, trailerAngle) {
         var delta = normalizeAngleDegrees(trailerAngle - tractorAngle)
         var clampedDelta = Math.max(-maxArticulationAngle, Math.min(maxArticulationAngle, delta))
@@ -532,6 +701,16 @@ window.CarSimPhysics = (function() {
         }
     }
 
+    function getWallCollisionBox(wall) {
+        return {
+            centerX: wall.xPosition + wall.width / 2,
+            centerY: wall.yPosition + wall.height / 2,
+            width: wall.width,
+            height: wall.height,
+            angle: wall.facingAngle * Math.PI / 180
+        }
+    }
+
     function spawnRandomVehicle(state) {
         var playerCenter = getCarCenter(state.car)
         var attemptCount = 32
@@ -585,6 +764,10 @@ window.CarSimPhysics = (function() {
         }
 
         if (bodiesColliding(candidateBox, getTrailerCollisionBox(state.trailer))) {
+            return false
+        }
+
+        if (bodiesColliding(candidateBox, getWallCollisionBox(state.world.wall))) {
             return false
         }
 
@@ -806,6 +989,12 @@ window.CarSimPhysics = (function() {
                 strokeStyle: "rgba(255, 176, 64, 0.95)",
                 fillStyle: "rgba(255, 176, 64, 0.12)",
                 box: getTrailerCollisionBox(state.trailer)
+            },
+            {
+                label: "Wall",
+                strokeStyle: "rgba(255, 84, 84, 0.95)",
+                fillStyle: "rgba(255, 84, 84, 0.12)",
+                box: getWallCollisionBox(state.world.wall)
             }
         ]
 
@@ -871,6 +1060,7 @@ window.CarSimPhysics = (function() {
         getDebugHitboxes: getDebugHitboxes,
         getVehicleRadiusDebug: getVehicleRadiusDebug,
         getAttachRadiusDebug: getAttachRadiusDebug,
+        getWallCollisionBox: getWallCollisionBox,
         resetTrailerToHitch: resetTrailerToHitch,
         releaseTrailerFromHitch: releaseTrailerFromHitch,
         getCarCenter: getCarCenter

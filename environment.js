@@ -14,6 +14,7 @@ window.CarSimEnvironment = (function() {
         ctx.save()
         ctx.translate(canvas.width / 2 - cameraX, canvas.height / 2 - cameraY)
         drawSurface(ctx, canvas, cameraX, cameraY)
+        drawWall(ctx, state.world.wall)
         drawWheelTrails(ctx, state)
         drawDebugHitboxes(ctx, state)
         drawVehicleRadiusDebug(ctx, state)
@@ -98,6 +99,41 @@ window.CarSimEnvironment = (function() {
 
         ctx.stroke()
         ctx.restore()
+    }
+
+    function drawWall(ctx, wall) {
+        ctx.save()
+        ctx.translate(wall.xPosition + wall.width / 2, wall.yPosition + wall.height / 2)
+        ctx.rotate(wall.facingAngle * Math.PI / 180)
+
+        ctx.fillStyle = "rgb(132, 136, 142)"
+        ctx.fillRect(-wall.width / 2, -wall.height / 2, wall.width, wall.height)
+
+        ctx.fillStyle = "rgb(110, 114, 120)"
+        ctx.fillRect(-wall.width / 2, -wall.height / 2, wall.width, wall.height * 0.18)
+
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.22)"
+        ctx.lineWidth = 2
+        ctx.strokeRect(-wall.width / 2, -wall.height / 2, wall.width, wall.height)
+
+        drawWallSegments(ctx, wall)
+        ctx.restore()
+    }
+
+    function drawWallSegments(ctx, wall) {
+        var segmentWidth = 40
+        var startX = -wall.width / 2 + segmentWidth
+        var x
+
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.16)"
+        ctx.lineWidth = 1.5
+
+        for (x = startX; x < wall.width / 2; x += segmentWidth) {
+            ctx.beginPath()
+            ctx.moveTo(x, -wall.height / 2)
+            ctx.lineTo(x, wall.height / 2)
+            ctx.stroke()
+        }
     }
 
     function drawDebugHitboxes(ctx, state) {
