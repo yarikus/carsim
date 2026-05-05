@@ -184,11 +184,11 @@ window.CarSimPhysics = (function() {
         var enterPressed = isAnyKeyPressed(keyArray, ["Enter", "NumpadEnter"])
         var trailerTogglePressed = isAnyKeyPressed(keyArray, ["t", "T", "KeyT"])
 
-        if (moveRight && car.velocity !== 0) {
+        if (moveRight) {
             steeringInput = 1
         }
 
-        if (moveLeft && car.velocity !== 0) {
+        if (moveLeft) {
             steeringInput = -1
             music.muted = false
         }
