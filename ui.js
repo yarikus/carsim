@@ -192,7 +192,8 @@ window.CarSimUI = (function() {
             wheelsOnly: state.modelDebugWheelsOnly,
             showShadows: state.graphicsShowShadows,
             showWheels: state.graphicsShowWheels || state.modelDebugWheelsOnly,
-            accentColor: state.car.accentColor
+            accentColor: state.car.accentColor,
+            definition: state.car.vehicleDefinition
         })
     }
 
@@ -209,7 +210,8 @@ window.CarSimUI = (function() {
             wheelsOnly: state.modelDebugWheelsOnly,
             showShadows: state.graphicsShowShadows,
             showWheels: state.graphicsShowWheels || state.modelDebugWheelsOnly,
-            accentColor: vehicle.accentColor
+            accentColor: vehicle.accentColor,
+            definition: vehicle.vehicleDefinition
         })
     }
 

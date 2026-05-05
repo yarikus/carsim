@@ -7,7 +7,10 @@ window.CarSimVehicleAppearance = (function() {
         var wheelsOnly = options && options.wheelsOnly
         var showShadows = !options || options.showShadows !== false
         var showWheels = !options || options.showWheels !== false
-        var accentColor = options && options.accentColor ? options.accentColor : "rgb(170, 28, 28)"
+        var definition = options && options.definition ? options.definition : getFallbackDefinition()
+        var colors = definition.colors
+        var geometry = definition.geometry
+        var accentColor = options && options.accentColor ? options.accentColor : colors.accent
 
         if (debugMode) {
             ctx.strokeStyle = "rgb(255, 0, 0)"
@@ -17,36 +20,36 @@ window.CarSimVehicleAppearance = (function() {
             ctx.stroke()
         }
 
-        var sleeperLength = car.width * 0.22
-        var cabLength = car.width * 0.18
-        var hoodLength = car.width * 0.26
-        var frameLength = car.width * 0.28
-        var bodyHeight = car.height * 0.72
-        var hoodHeight = car.height * 0.5
-        var sleeperHeight = car.height * 0.66
+        var sleeperLength = car.width * geometry.sleeperRatio
+        var cabLength = car.width * geometry.cabRatio
+        var hoodLength = car.width * geometry.hoodRatio
+        var frameLength = car.width * geometry.frameRatio
+        var bodyHeight = car.height * geometry.bodyHeightRatio
+        var hoodHeight = car.height * geometry.hoodHeightRatio
+        var sleeperHeight = car.height * geometry.sleeperHeightRatio
         var rearAxleFront = -car.width * 0.17
         var rearAxleBack = rearAxleFront - car.width * 0.12
         var steerAxleX = car.width * 0.34
         var outerWheelY = car.height * 0.42
         var wheelWidth = car.width * 0.115
         var wheelHeight = car.height * 0.18
-        var dualWheelGap = car.height * 0.09
+        var dualWheelGap = car.height * geometry.dualWheelGapRatio
         var sleeperStart = -car.width * 0.16
         var cabStart = sleeperStart + sleeperLength * 0.72
         var hoodStart = cabStart + cabLength * 0.58
         var stackX = sleeperStart - car.width * 0.01
 
         if (showShadows) {
-            drawTruckShadow(ctx, car)
+            drawTruckShadow(ctx, car, colors.shadow)
         }
 
         if (showWheels) {
-            drawRearDualWheelSet(ctx, rearAxleBack, -outerWheelY, wheelWidth, wheelHeight, dualWheelGap, wheels.rearLeft)
-            drawRearDualWheelSet(ctx, rearAxleBack, outerWheelY, wheelWidth, wheelHeight, dualWheelGap, wheels.rearRight)
-            drawRearDualWheelSet(ctx, rearAxleFront, -outerWheelY, wheelWidth, wheelHeight, dualWheelGap, wheels.rearLeft)
-            drawRearDualWheelSet(ctx, rearAxleFront, outerWheelY, wheelWidth, wheelHeight, dualWheelGap, wheels.rearRight)
-            drawWheel(ctx, steerAxleX, -outerWheelY, wheelWidth, wheelHeight, wheels.frontLeft)
-            drawWheel(ctx, steerAxleX, outerWheelY, wheelWidth, wheelHeight, wheels.frontRight)
+            drawRearDualWheelSet(ctx, rearAxleBack, -outerWheelY, wheelWidth, wheelHeight, dualWheelGap, wheels.rearLeft, colors)
+            drawRearDualWheelSet(ctx, rearAxleBack, outerWheelY, wheelWidth, wheelHeight, dualWheelGap, wheels.rearRight, colors)
+            drawRearDualWheelSet(ctx, rearAxleFront, -outerWheelY, wheelWidth, wheelHeight, dualWheelGap, wheels.rearLeft, colors)
+            drawRearDualWheelSet(ctx, rearAxleFront, outerWheelY, wheelWidth, wheelHeight, dualWheelGap, wheels.rearRight, colors)
+            drawWheel(ctx, steerAxleX, -outerWheelY, wheelWidth, wheelHeight, wheels.frontLeft, colors)
+            drawWheel(ctx, steerAxleX, outerWheelY, wheelWidth, wheelHeight, wheels.frontRight, colors)
         }
 
         if (wheelsOnly) {
@@ -63,7 +66,7 @@ window.CarSimVehicleAppearance = (function() {
         roundRect(ctx, cabStart, -bodyHeight / 2, cabLength, bodyHeight, 11)
         ctx.fill()
 
-        ctx.fillStyle = "rgb(185, 189, 194)"
+        ctx.fillStyle = colors.body
         roundRect(ctx, hoodStart, -hoodHeight / 2, hoodLength, hoodHeight, 10)
         ctx.fill()
 
@@ -77,7 +80,7 @@ window.CarSimVehicleAppearance = (function() {
         roundRect(ctx, cabStart + car.width * 0.015, -bodyHeight * 0.4, cabLength * 0.44, bodyHeight * 0.8, 7)
         ctx.fill()
 
-        ctx.fillStyle = "rgba(163, 188, 206, 0.74)"
+        ctx.fillStyle = colors.glass
         roundRect(ctx, cabStart + cabLength * 0.1, -bodyHeight * 0.32, cabLength * 0.26, bodyHeight * 0.64, 6)
         ctx.fill()
         roundRect(ctx, sleeperStart + sleeperLength * 0.18, -sleeperHeight * 0.22, sleeperLength * 0.16, sleeperHeight * 0.44, 5)
@@ -87,7 +90,7 @@ window.CarSimVehicleAppearance = (function() {
         roundRect(ctx, hoodStart - car.width * 0.01, -car.height * 0.46, car.width * 0.02, car.height * 0.92, 5)
         ctx.fill()
 
-        ctx.fillStyle = "rgb(198, 202, 206)"
+        ctx.fillStyle = colors.trim
         roundRect(ctx, stackX, -car.height * 0.47, car.width * 0.03, car.height * 0.22, 4)
         ctx.fill()
         roundRect(ctx, stackX, car.height * 0.25, car.width * 0.03, car.height * 0.22, 4)
@@ -118,24 +121,24 @@ window.CarSimVehicleAppearance = (function() {
         drawKingpinPlate(ctx, car)
     }
 
-    function drawTruckShadow(ctx, car) {
+    function drawTruckShadow(ctx, car, shadowColor) {
         ctx.save()
-        ctx.fillStyle = "rgba(0, 0, 0, 0.22)"
+        ctx.fillStyle = shadowColor
         roundRect(ctx, -car.width * 0.4, -car.height * 0.42, car.width * 0.86, car.height * 0.84, 14)
         ctx.fill()
         ctx.restore()
     }
 
-    function drawRearDualWheelSet(ctx, centerX, centerY, width, height, gap, wheelState) {
-        drawWheel(ctx, centerX - gap * 0.5, centerY, width, height, wheelState)
-        drawWheel(ctx, centerX + gap * 0.5, centerY, width, height, wheelState)
+    function drawRearDualWheelSet(ctx, centerX, centerY, width, height, gap, wheelState, colors) {
+        drawWheel(ctx, centerX - gap * 0.5, centerY, width, height, wheelState, colors)
+        drawWheel(ctx, centerX + gap * 0.5, centerY, width, height, wheelState, colors)
     }
 
-    function drawWheel(ctx, centerX, centerY, width, height, wheelState) {
+    function drawWheel(ctx, centerX, centerY, width, height, wheelState, colors) {
         ctx.save()
         ctx.translate(centerX, centerY)
         ctx.rotate((wheelState.steeringAngle || 0) * Math.PI / 180)
-        ctx.fillStyle = "rgb(18, 18, 18)"
+        ctx.fillStyle = colors.wheel
         roundRect(ctx, -width / 2, -height / 2, width, height, 4)
         ctx.fill()
 
@@ -189,6 +192,10 @@ window.CarSimVehicleAppearance = (function() {
         ctx.moveTo(kingpinX, -kingpinRadius * 0.9)
         ctx.lineTo(kingpinX, kingpinRadius * 0.9)
         ctx.stroke()
+    }
+
+    function getFallbackDefinition() {
+        return window.CarSimVehicleDefinitions.getPreferredDefinition()
     }
 
     function roundRect(ctx, x, y, width, height, radius) {

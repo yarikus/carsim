@@ -8,26 +8,10 @@ window.CarSimPhysics = (function() {
     var trailerAttachRadius = 120
 
     function createState() {
+        var preferredDefinition = window.CarSimVehicleDefinitions.getPreferredDefinition()
+
         return {
-            car: {
-                width: 156,
-                height: 58,
-                xPosition: 0,
-                yPosition: 0,
-                velocity: 0,
-                displayVelocity: 0,
-                forceFoward: 0,
-                forceBackward: 0,
-                facingAngle: 0,
-                steeringAngle: 0,
-                wheelBase: 96,
-                frontTrack: 44,
-                rearTrack: 44,
-                hitchOffset: -36,
-                accentColor: "rgb(170, 28, 28)",
-                mass: 7200,
-                structuralStrength: 8200
-            },
+            car: createVehicleStateFromDefinition(preferredDefinition),
             trailer: {
                 width: 352,
                 height: 58,
@@ -99,29 +83,40 @@ window.CarSimPhysics = (function() {
         }
     }
 
-    function createSpawnedVehicleState(xPosition, yPosition, facingAngle, accentColor) {
-        return {
-            width: 156,
-            height: 58,
-            xPosition: xPosition,
-            yPosition: yPosition,
+    function createVehicleStateFromDefinition(definition) {
+        var vehicle = {
+            xPosition: 0,
+            yPosition: 0,
             velocity: 0,
             displayVelocity: 0,
             forceFoward: 0,
             forceBackward: 0,
-            facingAngle: facingAngle,
+            facingAngle: 0,
             steeringAngle: 0,
             wheelBase: 96,
             frontTrack: 44,
             rearTrack: 44,
             hitchOffset: -36,
-            accentColor: accentColor,
-            mass: 6400,
-            structuralStrength: 7000,
+            accentColor: "rgb(170, 28, 28)",
+            mass: 7200,
+            structuralStrength: 8200,
             impactVelocityX: 0,
             impactVelocityY: 0,
             angularVelocity: 0
         }
+
+        window.CarSimVehicleDefinitions.applyDefinitionToVehicleState(vehicle, definition)
+        return vehicle
+    }
+
+    function createSpawnedVehicleState(xPosition, yPosition, facingAngle, definition) {
+        var vehicle = createVehicleStateFromDefinition(definition)
+
+        vehicle.xPosition = xPosition
+        vehicle.yPosition = yPosition
+        vehicle.facingAngle = facingAngle
+        vehicle.accentColor = definition.colors.accent
+        return vehicle
     }
 
     function initializeWorld(state) {
@@ -713,6 +708,7 @@ window.CarSimPhysics = (function() {
 
     function spawnRandomVehicle(state) {
         var playerCenter = getCarCenter(state.car)
+        var availableDefinitions = window.CarSimVehicleDefinitions.loadDefinitions()
         var attemptCount = 32
         var attempt
         var radius
@@ -721,7 +717,7 @@ window.CarSimPhysics = (function() {
         var centerX
         var centerY
         var vehicle
-        var accentColor
+        var definition
 
         for (attempt = 0; attempt < attemptCount; attempt++) {
             radius = 420 + Math.random() * 980
@@ -729,8 +725,13 @@ window.CarSimPhysics = (function() {
             facingAngle = Math.random() * 360
             centerX = playerCenter.x + Math.cos(angle) * radius
             centerY = playerCenter.y + Math.sin(angle) * radius
-            accentColor = getRandomAccentColor()
-            vehicle = createSpawnedVehicleState(centerX - 156 / 2, centerY - 58 / 2, facingAngle, accentColor)
+            definition = getRandomVehicleDefinition(availableDefinitions)
+            vehicle = createSpawnedVehicleState(
+                centerX - definition.geometry.width / 2,
+                centerY - definition.geometry.height / 2,
+                facingAngle,
+                definition
+            )
 
             if (isVehicleSpawnFree(state, vehicle)) {
                 state.spawnedVehicles.push(vehicle)
@@ -741,18 +742,12 @@ window.CarSimPhysics = (function() {
         return false
     }
 
-    function getRandomAccentColor() {
-        var palette = [
-            "rgb(178, 32, 32)",
-            "rgb(26, 92, 168)",
-            "rgb(208, 118, 24)",
-            "rgb(46, 122, 76)",
-            "rgb(132, 44, 148)",
-            "rgb(176, 176, 176)",
-            "rgb(196, 172, 42)"
-        ]
+    function getRandomVehicleDefinition(definitions) {
+        if (!definitions || definitions.length === 0) {
+            return window.CarSimVehicleDefinitions.getPreferredDefinition()
+        }
 
-        return palette[Math.floor(Math.random() * palette.length)]
+        return window.CarSimVehicleDefinitions.clone(definitions[Math.floor(Math.random() * definitions.length)])
     }
 
     function isVehicleSpawnFree(state, vehicle) {

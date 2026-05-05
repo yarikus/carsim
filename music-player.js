@@ -3,6 +3,7 @@
 window.CarSimMusicPlayer = (function() {
     var storageKey = "carsim.musicPlayerState"
     var pendingUserActivation = false
+    var memoryStorage = {}
 
     function initialize(state, music) {
         var musicToggle = document.getElementById("musicToggle")
@@ -115,7 +116,7 @@ window.CarSimMusicPlayer = (function() {
         var rawValue
 
         try {
-            rawValue = window.localStorage.getItem(storageKey)
+            rawValue = getStoredValue(storageKey)
             return rawValue ? JSON.parse(rawValue) : null
         } catch (error) {
             return null
@@ -131,7 +132,7 @@ window.CarSimMusicPlayer = (function() {
                 volume: Number.isFinite(music.volume) ? music.volume : 0.65,
                 currentTime: Number.isFinite(music.currentTime) ? music.currentTime : 0
             }
-            window.localStorage.setItem(storageKey, JSON.stringify(payload))
+            setStoredValue(storageKey, JSON.stringify(payload))
         } catch (error) {
         }
     }
@@ -211,6 +212,27 @@ window.CarSimMusicPlayer = (function() {
 
     function clamp(value, min, max) {
         return Math.max(min, Math.min(max, value))
+    }
+
+    function getStoredValue(key) {
+        if (!canUseLocalStorage()) {
+            return Object.prototype.hasOwnProperty.call(memoryStorage, key) ? memoryStorage[key] : null
+        }
+
+        return window.localStorage.getItem(key)
+    }
+
+    function setStoredValue(key, value) {
+        if (!canUseLocalStorage()) {
+            memoryStorage[key] = value
+            return
+        }
+
+        window.localStorage.setItem(key, value)
+    }
+
+    function canUseLocalStorage() {
+        return window.location.protocol !== "file:"
     }
 
     function formatTime(totalSeconds) {
