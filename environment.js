@@ -6,6 +6,12 @@ window.CarSimEnvironment = (function() {
         canvas.height = window.innerHeight
     }
 
+    function applyCameraTransform(ctx, canvas, state) {
+        ctx.translate(canvas.width / 2, canvas.height / 2)
+        ctx.scale(state.cameraZoom, state.cameraZoom)
+        ctx.translate(-canvas.width / 2, -canvas.height / 2)
+    }
+
     function drawEnvironment(ctx, canvas, state) {
         var car = state.car
         var cameraX = car.xPosition + car.width / 2
@@ -285,6 +291,7 @@ window.CarSimEnvironment = (function() {
 
     return {
         resizeCanvas: resizeCanvas,
+        applyCameraTransform: applyCameraTransform,
         drawEnvironment: drawEnvironment
     }
 })()

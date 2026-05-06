@@ -47,6 +47,8 @@ function draw(timestamp) {
     }
 
     ctx.clearRect(0, 0, canvas.width, canvas.height)
+    ctx.save()
+    window.CarSimEnvironment.applyCameraTransform(ctx, canvas, state)
     window.CarSimEnvironment.drawEnvironment(ctx, canvas, state)
 
     carCenter = window.CarSimPhysics.getCarCenter(state.car)
@@ -75,6 +77,7 @@ function draw(timestamp) {
     ctx.translate(canvas.width / 2 + trailerOffsetX, canvas.height / 2 + trailerOffsetY)
     ctx.rotate(state.trailer.facingAngle * Math.PI / 180)
     window.CarSimUI.drawTrailer(ctx, state)
+    ctx.restore()
     ctx.restore()
 
     window.CarSimUI.drawHud(ctx, canvas, state.car)

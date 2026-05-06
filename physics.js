@@ -47,6 +47,7 @@ window.CarSimPhysics = (function() {
             debugShowAttachRadius: false,
             graphicsShowShadows: true,
             graphicsShowWheels: true,
+            cameraZoom: 1,
             gameMenuOpen: false,
             pauseMenuSelection: 0,
             gameTimeSeconds: 9 * 60 * 60,

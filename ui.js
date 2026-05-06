@@ -15,6 +15,8 @@ window.CarSimUI = (function() {
 
     function initializeControls(state) {
         var configControls = document.querySelectorAll("[data-config]")
+        var cameraZoomControl = document.getElementById("cameraZoomControl")
+        var cameraZoomValue = document.getElementById("cameraZoomValue")
         var shadowToggle = document.getElementById("showShadowsToggle")
         var wheelToggle = document.getElementById("showWheelsToggle")
         var debugToggle = document.getElementById("modelDebugToggle")
@@ -35,6 +37,15 @@ window.CarSimUI = (function() {
                 syncControlValue(control)
             })
             syncControlValue(configControls[i])
+        }
+
+        if (cameraZoomControl) {
+            cameraZoomControl.value = String(state.cameraZoom)
+            syncCameraZoomValue(state.cameraZoom, cameraZoomValue)
+            cameraZoomControl.addEventListener("input", function(evt) {
+                state.cameraZoom = Number(evt.target.value)
+                syncCameraZoomValue(state.cameraZoom, cameraZoomValue)
+            })
         }
 
         if (shadowToggle) {
@@ -360,6 +371,14 @@ window.CarSimUI = (function() {
         }
 
         telemetryPanel.style.display = state.debugShowTelemetry ? "block" : "none"
+    }
+
+    function syncCameraZoomValue(value, valueElement) {
+        if (!valueElement) {
+            return
+        }
+
+        valueElement.textContent = value.toFixed(2) + "x"
     }
 
     function syncPauseMenu(state) {
