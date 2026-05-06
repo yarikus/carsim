@@ -20,6 +20,17 @@ window.CarSimVehicleAppearance = (function() {
             ctx.stroke()
         }
 
+        if (definition.type === "van" || definition.form === "panel-van") {
+            drawVan(ctx, car, wheels, {
+                wheelsOnly: wheelsOnly,
+                showShadows: showShadows,
+                showWheels: showWheels,
+                accentColor: accentColor,
+                colors: colors
+            })
+            return
+        }
+
         var sleeperLength = car.width * geometry.sleeperRatio
         var cabLength = car.width * geometry.cabRatio
         var hoodLength = car.width * geometry.hoodRatio
@@ -118,7 +129,82 @@ window.CarSimVehicleAppearance = (function() {
         roundRect(ctx, -car.width * 0.24, -car.height * 0.17, car.width * 0.12, car.height * 0.34, 5)
         ctx.fill()
 
-        drawKingpinPlate(ctx, car)
+        if (car.canTowTrailer !== false) {
+            drawKingpinPlate(ctx, car)
+        }
+    }
+
+    function drawVan(ctx, car, wheels, options) {
+        var wheelsOnly = options.wheelsOnly
+        var showShadows = options.showShadows
+        var showWheels = options.showWheels
+        var accentColor = options.accentColor
+        var colors = options.colors
+        var bodyWidth = car.width * 0.76
+        var bodyHeight = car.height * 0.8
+        var noseWidth = car.width * 0.18
+        var roofInset = car.height * 0.08
+        var frontAxleX = car.width * 0.24
+        var rearAxleX = -car.width * 0.18
+        var outerWheelY = car.height * 0.39
+        var wheelWidth = car.width * 0.1
+        var wheelHeight = car.height * 0.17
+        var sideMoldingX = -car.width * 0.12
+        var sideMoldingWidth = car.width * 0.52
+
+        if (showShadows) {
+            drawTruckShadow(ctx, car, colors.shadow)
+        }
+
+        if (showWheels) {
+            drawWheel(ctx, rearAxleX, -outerWheelY, wheelWidth, wheelHeight, wheels.rearLeft, colors)
+            drawWheel(ctx, rearAxleX, outerWheelY, wheelWidth, wheelHeight, wheels.rearRight, colors)
+            drawWheel(ctx, frontAxleX, -outerWheelY, wheelWidth, wheelHeight, wheels.frontLeft, colors)
+            drawWheel(ctx, frontAxleX, outerWheelY, wheelWidth, wheelHeight, wheels.frontRight, colors)
+        }
+
+        if (wheelsOnly) {
+            return
+        }
+
+        ctx.fillStyle = accentColor
+        roundRect(ctx, -car.width * 0.34, -bodyHeight / 2, bodyWidth, bodyHeight, 14)
+        ctx.fill()
+
+        ctx.fillStyle = colors.body
+        roundRect(ctx, car.width * 0.04, -bodyHeight * 0.42, noseWidth, bodyHeight * 0.84, 12)
+        ctx.fill()
+
+        ctx.fillStyle = "rgba(255, 255, 255, 0.28)"
+        roundRect(ctx, -car.width * 0.25, -bodyHeight / 2 + roofInset, bodyWidth * 0.66, bodyHeight * 0.12, 10)
+        ctx.fill()
+
+        ctx.fillStyle = colors.glass
+        roundRect(ctx, car.width * 0.01, -bodyHeight * 0.34, car.width * 0.2, bodyHeight * 0.68, 10)
+        ctx.fill()
+
+        ctx.fillStyle = "rgb(78, 84, 92)"
+        roundRect(ctx, sideMoldingX, -car.height * 0.06, sideMoldingWidth, car.height * 0.12, 6)
+        ctx.fill()
+
+        ctx.fillStyle = colors.trim
+        roundRect(ctx, -car.width * 0.06, -bodyHeight * 0.31, car.width * 0.02, bodyHeight * 0.62, 5)
+        ctx.fill()
+        roundRect(ctx, -car.width * 0.21, -car.height * 0.04, car.width * 0.16, car.height * 0.08, 5)
+        ctx.fill()
+
+        ctx.fillStyle = "rgb(234, 238, 216)"
+        roundRect(ctx, car.width * 0.17, -car.height * 0.21, car.width * 0.04, car.height * 0.1, 4)
+        ctx.fill()
+        roundRect(ctx, car.width * 0.17, car.height * 0.11, car.width * 0.04, car.height * 0.1, 4)
+        ctx.fill()
+
+        ctx.strokeStyle = "rgba(18, 22, 26, 0.38)"
+        ctx.lineWidth = 2
+        ctx.beginPath()
+        ctx.moveTo(-car.width * 0.03, -bodyHeight * 0.36)
+        ctx.lineTo(-car.width * 0.03, bodyHeight * 0.36)
+        ctx.stroke()
     }
 
     function drawTruckShadow(ctx, car, shadowColor) {

@@ -106,6 +106,41 @@ window.CarSimVehicleDefinitions = (function() {
                 rearTrack: 42,
                 hitchOffset: -28
             }
+        },
+        {
+            id: "caddy_max_van",
+            name: "Caddy Max Van",
+            type: "van",
+            form: "panel-van",
+            colors: {
+                accent: "rgb(198, 204, 210)",
+                body: "rgb(232, 236, 240)",
+                trim: "rgb(108, 116, 124)",
+                glass: "rgba(156, 186, 208, 0.78)",
+                wheel: "rgb(20, 20, 20)",
+                shadow: "rgba(0, 0, 0, 0.18)"
+            },
+            geometry: {
+                width: 126,
+                height: 56,
+                sleeperRatio: 0,
+                cabRatio: 0.28,
+                hoodRatio: 0.08,
+                frameRatio: 0.16,
+                bodyHeightRatio: 0.78,
+                hoodHeightRatio: 0.5,
+                sleeperHeightRatio: 0.78,
+                dualWheelGapRatio: 0
+            },
+            physics: {
+                mass: 1850,
+                structuralStrength: 3200,
+                wheelBase: 74,
+                frontTrack: 40,
+                rearTrack: 40,
+                hitchOffset: 0,
+                canTowTrailer: false
+            }
         }
     ]
 
@@ -267,6 +302,7 @@ window.CarSimVehicleDefinitions = (function() {
         normalized.physics.frontTrack = toNumber(normalized.physics.frontTrack, 44)
         normalized.physics.rearTrack = toNumber(normalized.physics.rearTrack, 44)
         normalized.physics.hitchOffset = toNumber(normalized.physics.hitchOffset, -36)
+        normalized.physics.canTowTrailer = normalized.physics.canTowTrailer !== false
         return normalized
     }
 
@@ -282,6 +318,7 @@ window.CarSimVehicleDefinitions = (function() {
         vehicle.frontTrack = normalizedDefinition.physics.frontTrack
         vehicle.rearTrack = normalizedDefinition.physics.rearTrack
         vehicle.hitchOffset = normalizedDefinition.physics.hitchOffset
+        vehicle.canTowTrailer = normalizedDefinition.physics.canTowTrailer
         vehicle.mass = normalizedDefinition.physics.mass
         vehicle.structuralStrength = normalizedDefinition.physics.structuralStrength
         vehicle.accentColor = accentOverride || normalizedDefinition.colors.accent

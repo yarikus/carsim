@@ -303,9 +303,19 @@ window.CarSimUI = (function() {
 
     function updateTrailerAttachButton(state) {
         var trailerAttachButton = document.getElementById("toggleTrailerAttachButton")
+        var canTowTrailer
         var canAttach
 
         if (!trailerAttachButton) {
+            return
+        }
+
+        canTowTrailer = window.CarSimPhysics.canVehicleTowTrailer(state.car)
+
+        if (!canTowTrailer) {
+            trailerAttachButton.textContent = "Trailer unavailable"
+            trailerAttachButton.disabled = true
+            trailerAttachButton.style.opacity = "0.45"
             return
         }
 

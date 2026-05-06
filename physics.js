@@ -134,6 +134,7 @@ window.CarSimPhysics = (function() {
             frontTrack: 44,
             rearTrack: 44,
             hitchOffset: -36,
+            canTowTrailer: true,
             accentColor: "rgb(170, 28, 28)",
             mass: 7200,
             structuralStrength: 8200,
@@ -159,7 +160,23 @@ window.CarSimPhysics = (function() {
     function initializeWorld(state) {
         state.car.xPosition = -state.car.width / 2
         state.car.yPosition = -state.car.height / 2
+        state.spawnedVehicles.push(createWallSideVehicle(state))
         attachTrailerToActiveCar(state)
+    }
+
+    function createWallSideVehicle(state) {
+        var wall = state.world.wall
+        var wallCenter = getWallCenter(wall)
+        var definition = window.CarSimVehicleDefinitions.getDefinitionById("caddy_max_van")
+        var vehicle = createSpawnedVehicleState(0, 0, 0, definition, state.worldPixelsPerMeter)
+        var clearance = Math.max(state.worldPixelsPerMeter * 1.2, 12)
+        var centerX = wallCenter.x - wall.width * 0.18
+        var centerY = wallCenter.y + wall.height / 2 + vehicle.height / 2 + clearance
+
+        vehicle.xPosition = centerX - vehicle.width / 2
+        vehicle.yPosition = centerY - vehicle.height / 2
+        vehicle.facingAngle = 0
+        return vehicle
     }
 
     function moveCar(state) {
@@ -686,9 +703,14 @@ window.CarSimPhysics = (function() {
         resetWheelState(state.wheels)
 
         if (switchingIntoTrailerOwner) {
-            state.debugDetachTrailer = false
-            state.trailerAttachedSpawnedVehicleIndex = null
-            attachTrailerToActiveCar(state)
+            if (canVehicleTowTrailer(state.car)) {
+                state.debugDetachTrailer = false
+                state.trailerAttachedSpawnedVehicleIndex = null
+                attachTrailerToActiveCar(state)
+            } else {
+                state.debugDetachTrailer = true
+                restoreBodyState(state.trailer, previousTrailerState)
+            }
         } else if (!state.debugDetachTrailer) {
             state.debugDetachTrailer = true
             state.trailerAttachedSpawnedVehicleIndex = nearbyVehicleIndex
@@ -721,6 +743,13 @@ window.CarSimPhysics = (function() {
         var hitchPosition = getCarHitchPosition(state.car)
         var trailer = state.trailer
 
+        if (!canVehicleTowTrailer(state.car)) {
+            state.debugDetachTrailer = true
+            state.trailerAttachedSpawnedVehicleIndex = null
+            return
+        }
+
+        state.debugDetachTrailer = false
         state.trailerAttachedSpawnedVehicleIndex = null
         trailer.facingAngle = state.car.facingAngle
         trailer.xPosition = hitchPosition.x
@@ -765,10 +794,11 @@ window.CarSimPhysics = (function() {
     function getCarHitchPosition(car) {
         var center = getCarCenter(car)
         var angle = car.facingAngle * Math.PI / 180
+        var hitchOffset = canVehicleTowTrailer(car) ? car.hitchOffset : 0
 
         return {
-            x: center.x + Math.cos(angle) * car.hitchOffset,
-            y: center.y + Math.sin(angle) * car.hitchOffset
+            x: center.x + Math.cos(angle) * hitchOffset,
+            y: center.y + Math.sin(angle) * hitchOffset
         }
     }
 
@@ -814,6 +844,10 @@ window.CarSimPhysics = (function() {
     }
 
     function toggleTrailerAttachment(state) {
+        if (!canVehicleTowTrailer(state.car)) {
+            return false
+        }
+
         if (state.debugDetachTrailer) {
             return attachTrailerIfPossible(state)
         }
@@ -838,6 +872,10 @@ window.CarSimPhysics = (function() {
         var trailerKingpinPosition = getTrailerKingpinPosition(state.trailer)
         var attachRadius = getTrailerAttachRadius(state)
 
+        if (!canVehicleTowTrailer(state.car)) {
+            return false
+        }
+
         if (!state.debugDetachTrailer) {
             return true
         }
@@ -850,6 +888,10 @@ window.CarSimPhysics = (function() {
             x: trailer.xPosition,
             y: trailer.yPosition
         }
+    }
+
+    function canVehicleTowTrailer(car) {
+        return Boolean(car) && car.canTowTrailer !== false
     }
 
     function getCarCollisionBox(car) {
@@ -1222,6 +1264,7 @@ window.CarSimPhysics = (function() {
         spawnRandomVehicle: spawnRandomVehicle,
         toggleTrailerAttachment: toggleTrailerAttachment,
         canAttachTrailer: canAttachTrailer,
+        canVehicleTowTrailer: canVehicleTowTrailer,
         clearWheelTrails: clearWheelTrails,
         getDebugHitboxes: getDebugHitboxes,
         getVehicleRadiusDebug: getVehicleRadiusDebug,
