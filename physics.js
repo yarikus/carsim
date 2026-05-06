@@ -6,21 +6,26 @@ window.CarSimPhysics = (function() {
     var maxArticulationAngle = 78
     var vehicleSwapRadius = 230
     var trailerAttachRadius = 120
+    var defaultPixelsPerMeter = 32
+    var trailerLengthMeters = 16
+    var trailerWidthMeters = 2.6
 
     function createState() {
         var preferredDefinition = window.CarSimVehicleDefinitions.getPreferredDefinition()
+        var trailerLengthPixels = Math.round(trailerLengthMeters * defaultPixelsPerMeter)
+        var trailerWidthPixels = Math.round(trailerWidthMeters * defaultPixelsPerMeter)
 
         return {
             car: createVehicleStateFromDefinition(preferredDefinition),
             trailer: {
-                width: 352,
-                height: 58,
+                width: trailerLengthPixels,
+                height: trailerWidthPixels,
                 xPosition: 0,
                 yPosition: 0,
                 facingAngle: 0,
                 kingpinOffset: 0,
-                axleOffset: -224,
-                wheelTrack: 44,
+                axleOffset: -328,
+                wheelTrack: 62,
                 mass: 9300,
                 structuralStrength: 14000
             },
@@ -49,7 +54,7 @@ window.CarSimPhysics = (function() {
             debugShowObjectDimensions: false,
             graphicsShowShadows: true,
             graphicsShowWheels: true,
-            pixelsPerMeter: 32,
+            pixelsPerMeter: defaultPixelsPerMeter,
             cameraZoom: 1,
             gameMenuOpen: false,
             pauseMenuSelection: 0,
