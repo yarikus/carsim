@@ -25,6 +25,9 @@ window.CarSimUI = (function() {
         var telemetryToggle = document.getElementById("telemetryDebugToggle")
         var radiusToggle = document.getElementById("vehicleRadiusDebugToggle")
         var attachRadiusToggle = document.getElementById("attachRadiusDebugToggle")
+        var calibrationGridToggle = document.getElementById("calibrationGridToggle")
+        var ppmControl = document.getElementById("ppmControl")
+        var ppmValue = document.getElementById("ppmValue")
         var trailerAttachButton = document.getElementById("toggleTrailerAttachButton")
         var spawnVehicleButton = document.getElementById("spawnVehicleButton")
         var i
@@ -105,6 +108,22 @@ window.CarSimUI = (function() {
             attachRadiusToggle.checked = state.debugShowAttachRadius
             attachRadiusToggle.addEventListener("change", function(evt) {
                 state.debugShowAttachRadius = evt.target.checked
+            })
+        }
+
+        if (calibrationGridToggle) {
+            calibrationGridToggle.checked = state.debugShowCalibrationGrid
+            calibrationGridToggle.addEventListener("change", function(evt) {
+                state.debugShowCalibrationGrid = evt.target.checked
+            })
+        }
+
+        if (ppmControl) {
+            ppmControl.value = String(state.pixelsPerMeter)
+            syncPpmValue(state.pixelsPerMeter, ppmValue)
+            ppmControl.addEventListener("input", function(evt) {
+                state.pixelsPerMeter = Number(evt.target.value)
+                syncPpmValue(state.pixelsPerMeter, ppmValue)
             })
         }
 
@@ -379,6 +398,14 @@ window.CarSimUI = (function() {
         }
 
         valueElement.textContent = value.toFixed(2) + "x"
+    }
+
+    function syncPpmValue(value, valueElement) {
+        if (!valueElement) {
+            return
+        }
+
+        valueElement.textContent = String(Math.round(value))
     }
 
     function syncPauseMenu(state) {

@@ -20,12 +20,91 @@ window.CarSimEnvironment = (function() {
         ctx.save()
         ctx.translate(canvas.width / 2 - cameraX, canvas.height / 2 - cameraY)
         drawSurface(ctx, canvas, cameraX, cameraY)
+        drawCalibrationGrid(ctx, canvas, state, cameraX, cameraY)
         drawWall(ctx, state.world.wall)
         drawWheelTrails(ctx, state)
         drawDebugHitboxes(ctx, state)
         drawVehicleRadiusDebug(ctx, state)
         drawAttachRadiusDebug(ctx, state)
         ctx.restore()
+    }
+
+    function drawCalibrationGrid(ctx, canvas, state, cameraX, cameraY) {
+        var pixelsPerMeter
+        var fineStep
+        var majorStep
+        var startX
+        var endX
+        var startY
+        var endY
+        var x
+        var y
+
+        if (!state.debugShowCalibrationGrid) {
+            return
+        }
+
+        pixelsPerMeter = Math.max(1, state.pixelsPerMeter)
+        fineStep = pixelsPerMeter
+        majorStep = pixelsPerMeter * 5
+        startX = Math.floor((cameraX - canvas.width) / fineStep) * fineStep
+        endX = Math.ceil((cameraX + canvas.width) / fineStep) * fineStep
+        startY = Math.floor((cameraY - canvas.height) / fineStep) * fineStep
+        endY = Math.ceil((cameraY + canvas.height) / fineStep) * fineStep
+
+        ctx.save()
+
+        for (x = startX; x <= endX; x += fineStep) {
+            if (Math.round(x / fineStep) % 5 === 0) {
+                ctx.strokeStyle = "rgba(255, 255, 255, 0.18)"
+                ctx.lineWidth = 1.6
+            } else {
+                ctx.strokeStyle = "rgba(255, 255, 255, 0.08)"
+                ctx.lineWidth = 1
+            }
+
+            ctx.beginPath()
+            ctx.moveTo(x, startY)
+            ctx.lineTo(x, endY)
+            ctx.stroke()
+        }
+
+        for (y = startY; y <= endY; y += fineStep) {
+            if (Math.round(y / fineStep) % 5 === 0) {
+                ctx.strokeStyle = "rgba(255, 255, 255, 0.18)"
+                ctx.lineWidth = 1.6
+            } else {
+                ctx.strokeStyle = "rgba(255, 255, 255, 0.08)"
+                ctx.lineWidth = 1
+            }
+
+            ctx.beginPath()
+            ctx.moveTo(startX, y)
+            ctx.lineTo(endX, y)
+            ctx.stroke()
+        }
+
+        drawCalibrationLabels(ctx, startX, startY, endX, endY, majorStep, pixelsPerMeter)
+        ctx.restore()
+    }
+
+    function drawCalibrationLabels(ctx, startX, startY, endX, endY, majorStep, pixelsPerMeter) {
+        var x
+        var y
+        var meterValue
+
+        ctx.fillStyle = "rgba(255, 255, 255, 0.42)"
+        ctx.font = "12px Arial"
+
+        for (x = Math.ceil(startX / majorStep) * majorStep; x <= endX; x += majorStep) {
+            meterValue = Math.round(x / pixelsPerMeter)
+            ctx.fillText(meterValue + " m", x + 6, startY + 16)
+        }
+
+        for (y = Math.ceil(startY / majorStep) * majorStep; y <= endY; y += majorStep) {
+            meterValue = Math.round(y / pixelsPerMeter)
+            ctx.fillText(meterValue + " m", startX + 6, y - 6)
+        }
     }
 
     function drawSurface(ctx, canvas, cameraX, cameraY) {
