@@ -24,6 +24,7 @@ window.CarSimEnvironment = (function() {
         drawWall(ctx, state.world.wall)
         drawWheelTrails(ctx, state)
         drawDebugHitboxes(ctx, state)
+        drawObjectDimensions(ctx, state)
         drawVehicleRadiusDebug(ctx, state)
         drawAttachRadiusDebug(ctx, state)
         ctx.restore()
@@ -316,6 +317,82 @@ window.CarSimEnvironment = (function() {
             ctx.fill()
         }
 
+        ctx.restore()
+    }
+
+    function drawObjectDimensions(ctx, state) {
+        var ppm
+        var i
+
+        if (!state.debugShowObjectDimensions) {
+            return
+        }
+
+        ppm = Math.max(1, state.pixelsPerMeter)
+
+        drawDimensionLabel(
+            ctx,
+            state.car.xPosition + state.car.width / 2,
+            state.car.yPosition - 22,
+            "Tractor",
+            state.car.width,
+            state.car.height,
+            ppm,
+            "rgba(87, 214, 255, 0.92)"
+        )
+
+        drawDimensionLabel(
+            ctx,
+            state.trailer.xPosition + Math.cos(state.trailer.facingAngle * Math.PI / 180) * (-state.trailer.width * 0.28),
+            state.trailer.yPosition + Math.sin(state.trailer.facingAngle * Math.PI / 180) * (-state.trailer.width * 0.28) - 18,
+            "Trailer",
+            state.trailer.width,
+            state.trailer.height,
+            ppm,
+            "rgba(255, 176, 64, 0.94)"
+        )
+
+        drawDimensionLabel(
+            ctx,
+            state.world.wall.xPosition + state.world.wall.width / 2,
+            state.world.wall.yPosition - 18,
+            "Wall",
+            state.world.wall.width,
+            state.world.wall.height,
+            ppm,
+            "rgba(255, 84, 84, 0.94)"
+        )
+
+        for (i = 0; i < state.spawnedVehicles.length; i++) {
+            drawDimensionLabel(
+                ctx,
+                state.spawnedVehicles[i].xPosition + state.spawnedVehicles[i].width / 2,
+                state.spawnedVehicles[i].yPosition - 18,
+                "Vehicle " + (i + 1),
+                state.spawnedVehicles[i].width,
+                state.spawnedVehicles[i].height,
+                ppm,
+                "rgba(158, 255, 96, 0.94)"
+            )
+        }
+    }
+
+    function drawDimensionLabel(ctx, x, y, label, widthPixels, heightPixels, ppm, accentColor) {
+        var widthMeters = (widthPixels / ppm).toFixed(2)
+        var heightMeters = (heightPixels / ppm).toFixed(2)
+        var text = label + "  " + widthMeters + "m x " + heightMeters + "m"
+        var textWidth
+
+        ctx.save()
+        ctx.font = "12px Arial"
+        textWidth = ctx.measureText(text).width
+        ctx.fillStyle = "rgba(7, 10, 12, 0.72)"
+        ctx.fillRect(x - textWidth / 2 - 8, y - 14, textWidth + 16, 20)
+        ctx.strokeStyle = accentColor
+        ctx.lineWidth = 1.2
+        ctx.strokeRect(x - textWidth / 2 - 8, y - 14, textWidth + 16, 20)
+        ctx.fillStyle = accentColor
+        ctx.fillText(text, x - textWidth / 2, y)
         ctx.restore()
     }
 

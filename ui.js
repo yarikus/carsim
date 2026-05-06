@@ -28,6 +28,7 @@ window.CarSimUI = (function() {
         var calibrationGridToggle = document.getElementById("calibrationGridToggle")
         var ppmControl = document.getElementById("ppmControl")
         var ppmValue = document.getElementById("ppmValue")
+        var objectDimensionsToggle = document.getElementById("objectDimensionsToggle")
         var trailerAttachButton = document.getElementById("toggleTrailerAttachButton")
         var spawnVehicleButton = document.getElementById("spawnVehicleButton")
         var i
@@ -124,6 +125,13 @@ window.CarSimUI = (function() {
             ppmControl.addEventListener("input", function(evt) {
                 state.pixelsPerMeter = Number(evt.target.value)
                 syncPpmValue(state.pixelsPerMeter, ppmValue)
+            })
+        }
+
+        if (objectDimensionsToggle) {
+            objectDimensionsToggle.checked = state.debugShowObjectDimensions
+            objectDimensionsToggle.addEventListener("change", function(evt) {
+                state.debugShowObjectDimensions = evt.target.checked
             })
         }
 

@@ -46,6 +46,7 @@ window.CarSimPhysics = (function() {
             debugShowVehicleRadius: false,
             debugShowAttachRadius: false,
             debugShowCalibrationGrid: false,
+            debugShowObjectDimensions: false,
             graphicsShowShadows: true,
             graphicsShowWheels: true,
             pixelsPerMeter: 32,
