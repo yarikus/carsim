@@ -19,7 +19,7 @@ window.CarSimEnvironment = (function() {
 
         ctx.save()
         ctx.translate(canvas.width / 2 - cameraX, canvas.height / 2 - cameraY)
-        drawSurface(ctx, canvas, cameraX, cameraY)
+        drawSurface(ctx, canvas, state, cameraX, cameraY)
         drawCalibrationGrid(ctx, canvas, state, cameraX, cameraY)
         drawWall(ctx, state.world.wall)
         drawWheelTrails(ctx, state)
@@ -45,7 +45,7 @@ window.CarSimEnvironment = (function() {
             return
         }
 
-        pixelsPerMeter = Math.max(1, state.pixelsPerMeter)
+        pixelsPerMeter = Math.max(1, state.gridPixelsPerMeter)
         fineStep = pixelsPerMeter
         majorStep = pixelsPerMeter * 5
         startX = Math.floor((cameraX - canvas.width) / fineStep) * fineStep
@@ -108,8 +108,8 @@ window.CarSimEnvironment = (function() {
         }
     }
 
-    function drawSurface(ctx, canvas, cameraX, cameraY) {
-        var tileSize = 160
+    function drawSurface(ctx, canvas, state, cameraX, cameraY) {
+        var tileSize = Math.max(80, Math.round(state.worldPixelsPerMeter * 5))
         var startX = Math.floor((cameraX - canvas.width) / tileSize) * tileSize
         var endX = Math.ceil((cameraX + canvas.width) / tileSize) * tileSize
         var startY = Math.floor((cameraY - canvas.height) / tileSize) * tileSize
@@ -207,7 +207,7 @@ window.CarSimEnvironment = (function() {
     }
 
     function drawWallSegments(ctx, wall) {
-        var segmentWidth = 40
+        var segmentWidth = Math.max(20, wall.width / 12)
         var startX = -wall.width / 2 + segmentWidth
         var x
 
@@ -328,7 +328,7 @@ window.CarSimEnvironment = (function() {
             return
         }
 
-        ppm = Math.max(1, state.pixelsPerMeter)
+        ppm = Math.max(1, state.worldPixelsPerMeter)
 
         drawDimensionLabel(
             ctx,

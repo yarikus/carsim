@@ -17,6 +17,8 @@ window.CarSimUI = (function() {
         var configControls = document.querySelectorAll("[data-config]")
         var cameraZoomControl = document.getElementById("cameraZoomControl")
         var cameraZoomValue = document.getElementById("cameraZoomValue")
+        var worldPpmControl = document.getElementById("worldPpmControl")
+        var worldPpmValue = document.getElementById("worldPpmValue")
         var shadowToggle = document.getElementById("showShadowsToggle")
         var wheelToggle = document.getElementById("showWheelsToggle")
         var debugToggle = document.getElementById("modelDebugToggle")
@@ -41,6 +43,24 @@ window.CarSimUI = (function() {
                 syncControlValue(control)
             })
             syncControlValue(configControls[i])
+        }
+
+        if (worldPpmControl) {
+            worldPpmControl.value = String(state.worldPixelsPerMeter)
+            syncPpmValue(state.worldPixelsPerMeter, worldPpmValue)
+            worldPpmControl.addEventListener("input", function(evt) {
+                var controlIndex
+                var configKey
+
+                window.CarSimPhysics.setWorldPixelsPerMeter(state, Number(evt.target.value))
+                syncPpmValue(state.worldPixelsPerMeter, worldPpmValue)
+
+                for (controlIndex = 0; controlIndex < configControls.length; controlIndex++) {
+                    configKey = configControls[controlIndex].dataset.config
+                    configControls[controlIndex].value = String(state.physicsConfig[configKey])
+                    syncControlValue(configControls[controlIndex])
+                }
+            })
         }
 
         if (cameraZoomControl) {
@@ -120,11 +140,11 @@ window.CarSimUI = (function() {
         }
 
         if (ppmControl) {
-            ppmControl.value = String(state.pixelsPerMeter)
-            syncPpmValue(state.pixelsPerMeter, ppmValue)
+            ppmControl.value = String(state.gridPixelsPerMeter)
+            syncPpmValue(state.gridPixelsPerMeter, ppmValue)
             ppmControl.addEventListener("input", function(evt) {
-                state.pixelsPerMeter = Number(evt.target.value)
-                syncPpmValue(state.pixelsPerMeter, ppmValue)
+                state.gridPixelsPerMeter = Number(evt.target.value)
+                syncPpmValue(state.gridPixelsPerMeter, ppmValue)
             })
         }
 
