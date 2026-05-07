@@ -112,6 +112,12 @@ window.CarSimVehicleDefinitions = (function() {
             name: "Caddy Max Van",
             type: "van",
             form: "panel-van",
+            sprite: {
+                src: "assets/caddy.png",
+                flipX: true,
+                widthRatio: 1.02,
+                heightRatio: 1.02
+            },
             colors: {
                 accent: "rgb(198, 204, 210)",
                 body: "rgb(232, 236, 240)",
@@ -121,8 +127,8 @@ window.CarSimVehicleDefinitions = (function() {
                 shadow: "rgba(0, 0, 0, 0.18)"
             },
             geometry: {
-                width: 126,
-                height: 56,
+                width: 157,
+                height: 61,
                 sleeperRatio: 0,
                 cabRatio: 0.28,
                 hoodRatio: 0.08,
@@ -135,9 +141,9 @@ window.CarSimVehicleDefinitions = (function() {
             physics: {
                 mass: 1850,
                 structuralStrength: 3200,
-                wheelBase: 74,
-                frontTrack: 40,
-                rearTrack: 40,
+                wheelBase: 95,
+                frontTrack: 51,
+                rearTrack: 51,
                 hitchOffset: 0,
                 canTowTrailer: false
             }

@@ -2,6 +2,7 @@
 
 window.CarSimVehicleAppearance = (function() {
     var debugMode = false
+    var spriteCache = {}
 
     function drawCar(ctx, car, wheels, options) {
         var wheelsOnly = options && options.wheelsOnly
@@ -26,7 +27,8 @@ window.CarSimVehicleAppearance = (function() {
                 showShadows: showShadows,
                 showWheels: showWheels,
                 accentColor: accentColor,
-                colors: colors
+                colors: colors,
+                definition: definition
             })
             return
         }
@@ -140,6 +142,7 @@ window.CarSimVehicleAppearance = (function() {
         var showWheels = options.showWheels
         var accentColor = options.accentColor
         var colors = options.colors
+        var definition = options.definition
         var bodyWidth = car.width * 0.76
         var bodyHeight = car.height * 0.8
         var noseWidth = car.width * 0.18
@@ -205,6 +208,8 @@ window.CarSimVehicleAppearance = (function() {
         ctx.moveTo(-car.width * 0.03, -bodyHeight * 0.36)
         ctx.lineTo(-car.width * 0.03, bodyHeight * 0.36)
         ctx.stroke()
+
+        drawVehicleSprite(ctx, car, definition)
     }
 
     function drawTruckShadow(ctx, car, shadowColor) {
@@ -278,6 +283,78 @@ window.CarSimVehicleAppearance = (function() {
         ctx.moveTo(kingpinX, -kingpinRadius * 0.9)
         ctx.lineTo(kingpinX, kingpinRadius * 0.9)
         ctx.stroke()
+    }
+
+    function drawVehicleSprite(ctx, car, definition) {
+        var spriteConfig = definition && definition.sprite
+        var spriteEntry
+        var drawWidth
+        var drawHeight
+        var offsetX
+        var offsetY
+
+        if (!spriteConfig || !spriteConfig.src) {
+            return false
+        }
+
+        spriteEntry = getSpriteEntry(spriteConfig.src)
+
+        if (!spriteEntry || !spriteEntry.loaded || !spriteEntry.image) {
+            return false
+        }
+
+        drawWidth = car.width * (spriteConfig.widthRatio || 1)
+        drawHeight = car.height * (spriteConfig.heightRatio || 1)
+        offsetX = car.width * (spriteConfig.offsetXRatio || 0)
+        offsetY = car.height * (spriteConfig.offsetYRatio || 0)
+
+        ctx.save()
+        ctx.translate(offsetX, offsetY)
+        ctx.globalAlpha = spriteConfig.opacity || 1
+
+        if (spriteConfig.flipX) {
+            ctx.scale(-1, 1)
+        }
+
+        if (spriteConfig.flipY) {
+            ctx.scale(1, -1)
+        }
+
+        ctx.drawImage(spriteEntry.image, -drawWidth / 2, -drawHeight / 2, drawWidth, drawHeight)
+        ctx.restore()
+        return true
+    }
+
+    function getSpriteEntry(spritePath) {
+        var entry
+
+        if (!spritePath) {
+            return null
+        }
+
+        entry = spriteCache[spritePath]
+
+        if (entry) {
+            return entry
+        }
+
+        entry = {
+            image: new Image(),
+            loaded: false,
+            failed: false
+        }
+
+        entry.image.onload = function() {
+            entry.loaded = true
+        }
+
+        entry.image.onerror = function() {
+            entry.failed = true
+        }
+
+        entry.image.src = spritePath
+        spriteCache[spritePath] = entry
+        return entry
     }
 
     function getFallbackDefinition() {
